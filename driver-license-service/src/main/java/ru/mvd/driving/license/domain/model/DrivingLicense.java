@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public class DrivingLicense extends AggregateRoot {
     public static final long DRIVING_LICENSE_VALID_YEAR_PERIOD = 10;
-
+    @Getter
     private DrivingLicenseId drivingLicenseId;
     private DepartmentId departmentId;
     private PersonId personId;
@@ -44,8 +44,8 @@ public class DrivingLicense extends AggregateRoot {
         this.issuanceReason = issuanceReason;
     }
 
-    public void revoke(LocalDate revocationEndDate, String judgmentFileId){
-        if(this.status == Status.INVALID)
+    public void revoke(LocalDate revocationEndDate, String judgmentFileId) {
+        if (this.status == Status.INVALID)
             throw new IllegalStateException("Wrong invocation for current state");
         this.revocation = startRevocation(revocationEndDate);
         attachJudgment(judgmentFileId);
@@ -54,15 +54,15 @@ public class DrivingLicense extends AggregateRoot {
                 this.revocation.getStartDate(), this.revocation.getEndDate()));
     }
 
-    void openSubCategories(){
+    void openSubCategories() {
         openSubCategory(Category.CategoryType.A, Category.CategoryType.A1);
         openSubCategory(Category.CategoryType.B, Category.CategoryType.B1);
         openSubCategory(Category.CategoryType.C, Category.CategoryType.C1);
         openSubCategory(Category.CategoryType.D, Category.CategoryType.D1);
     }
 
-    private void openSubCategory(Category.CategoryType categoryType, Category.CategoryType subCategoryType){
-        if(isCategoryOpen(categoryType)){
+    private void openSubCategory(Category.CategoryType categoryType, Category.CategoryType subCategoryType) {
+        if (isCategoryOpen(categoryType)) {
             Category category = this.categories.stream()
                     .filter(c -> c.getType() == categoryType)
                     .findFirst()
@@ -72,67 +72,67 @@ public class DrivingLicense extends AggregateRoot {
         }
     }
 
-    private boolean isCategoryOpen(Category.CategoryType categoryType){
+    private boolean isCategoryOpen(Category.CategoryType categoryType) {
         return this.categories.stream().anyMatch(category -> category.getType() == categoryType);
     }
 
-    public void prolongRevocation(LocalDate endDate){
-        if(this.status != Status.REVOKED)
+    public void prolongRevocation(LocalDate endDate) {
+        if (this.status != Status.REVOKED)
             throw new IllegalStateException("Wrong invocation for current state");
         this.revocation.prolong(endDate);
         raiseDomainEvent(new DrivingLicenseRevocationProlonged(this.drivingLicenseId, this.revocation.getRevocationId(), endDate));
     }
 
-    private Revocation startRevocation(LocalDate endDate){
+    private Revocation startRevocation(LocalDate endDate) {
         UUID uuid = UUID.randomUUID();
         RevocationId revocationId = new RevocationId(uuid.toString());
         return new Revocation(revocationId, LocalDate.now(), endDate, false);
     }
 
-    public void attachJudgment(String fileId){
+    public void attachJudgment(String fileId) {
         Attachment attachment = Attachment.newJudgmentAttachment(fileId);
         this.attachments.add(attachment);
     }
 
-    public void disable(){
-        if(this.status != Status.INVALID){
+    public void disable() {
+        if (this.status != Status.INVALID) {
             this.status = Status.INVALID;
             raiseDomainEvent(new DrivingLicenseDisabled(this.drivingLicenseId));
         }
     }
 
-    public void disableIfRevocationExpired(){
-        if(status == Status.REVOKED){
+    public void disableIfRevocationExpired() {
+        if (status == Status.REVOKED) {
             this.revocation.defineExpiration();
-            if(this.revocation.isExpired()){
+            if (this.revocation.isExpired()) {
                 disable();
                 raiseDomainEvent(new DrivingLicenseRevocationExpired(this.drivingLicenseId, this.revocation.getRevocationId()));
             }
         }
     }
 
-    public void disableIfExpired(){
-        if(status == Status.VALID){
-            if(isExpired()){
+    public void disableIfExpired() {
+        if (status == Status.VALID) {
+            if (isExpired()) {
                 this.status = Status.INVALID;
                 raiseDomainEvent(new DrivingLicenseDisabled(this.drivingLicenseId));
             }
         }
     }
 
-    private boolean isExpired(){
+    private boolean isExpired() {
         LocalDate currentDate = LocalDate.now();
         return currentDate.isAfter(this.endDate) || currentDate.isEqual(this.endDate);
     }
 
-    public void verifyAttachmentCompleteness(Function<List<Attachment>, Boolean> action){
+    public void verifyAttachmentCompleteness(Function<List<Attachment>, Boolean> action) {
         boolean allAttachmentsExist = action.apply(this.attachments);
-        if(!allAttachmentsExist)
+        if (!allAttachmentsExist)
             throw new IllegalStateException("Illegal document completeness for issuance");
     }
 
     @RequiredArgsConstructor
-    public enum Status{
+    public enum Status {
         VALID("Права действительны"),
         INVALID("Права недействительны"),
         REVOKED("Лишение прав");
@@ -142,7 +142,7 @@ public class DrivingLicense extends AggregateRoot {
     }
 
     @RequiredArgsConstructor
-    public enum SpecialMark{
+    public enum SpecialMark {
         GCL("GCL"),
         ML("ML"),
         AS("AS"),
@@ -156,20 +156,20 @@ public class DrivingLicense extends AggregateRoot {
         @Getter(AccessLevel.PACKAGE)
         private final String name;
 
-        public static SpecialMark fromName(String name){
-            for(SpecialMark specialMark: SpecialMark.values()){
-                if(specialMark.getName().equals(name))
+        public static SpecialMark fromName(String name) {
+            for (SpecialMark specialMark : SpecialMark.values()) {
+                if (specialMark.getName().equals(name))
                     return specialMark;
             }
             return Unknown;
         }
 
-        public static Set<SpecialMark> setFrom(Set<String> aSpecialMarks){
+        public static Set<SpecialMark> setFrom(Set<String> aSpecialMarks) {
             Set<SpecialMark> specialMarks = new HashSet<>();
-            if(CollectionUtils.isNotEmpty(aSpecialMarks)){
-                for (String rawSpecialMark: aSpecialMarks){
+            if (CollectionUtils.isNotEmpty(aSpecialMarks)) {
+                for (String rawSpecialMark : aSpecialMarks) {
                     SpecialMark specialMark = SpecialMark.fromName(rawSpecialMark);
-                    if(specialMark == SpecialMark.Unknown)
+                    if (specialMark == SpecialMark.Unknown)
                         throw new IllegalArgumentException(String.format("Unknown special mark %s", rawSpecialMark));
                     specialMarks.add(specialMark);
                 }

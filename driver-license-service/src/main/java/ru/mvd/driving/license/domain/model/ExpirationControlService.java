@@ -21,23 +21,29 @@ public class ExpirationControlService {
         this.drivingLicenseDisabledDomainEventPublisher = drivingLicenseDisabledDomainEventPublisher;
     }
 
-    @Scheduled
-    public void checkRevocationExpiration(){
+    @Scheduled(fixedDelayString = "${delay.revocation}")
+    public void checkRevocationExpiration() {
         DrivingLicense drivingLicense = drivingLicenseRepository.findNextRevokedDrivingLicense();
-        if(!Objects.isNull(drivingLicense)){
+        if (!Objects.isNull(drivingLicense)) {
             drivingLicense.disableIfRevocationExpired();
-            DrivingLicenseRevocationExpired domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseRevocationExpired.class);
-            drivingLicenseRevocationExpiredDomainEventPublisher.publish(domainEvent);
+            DrivingLicenseRevocationExpired drivingLicenseRevocationExpiredDomainEvent = drivingLicense
+                    .getDomainEventByType(DrivingLicenseRevocationExpired.class);
+            DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                    .getDomainEventByType(DrivingLicenseDisabled.class);
+            drivingLicenseDisabledDomainEventPublisher.publish(drivingLicenseDisabledDomainEvent);
+            drivingLicenseRevocationExpiredDomainEventPublisher.publish(drivingLicenseRevocationExpiredDomainEvent);
+            drivingLicenseRepository.save(drivingLicense);
         }
     }
 
-    @Scheduled
-    public void checkDrivingLicenseExpiration(){
+    @Scheduled(fixedDelayString = "${delay.driving-license}")
+    public void checkDrivingLicenseExpiration() {
         DrivingLicense drivingLicense = drivingLicenseRepository.findNextValidDrivingLicense();
-        if(!Objects.isNull(drivingLicense)){
+        if (!Objects.isNull(drivingLicense)) {
             drivingLicense.disableIfExpired();
             DrivingLicenseDisabled domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseDisabled.class);
             drivingLicenseDisabledDomainEventPublisher.publish(domainEvent);
+            drivingLicenseRepository.save(drivingLicense);
         }
     }
 

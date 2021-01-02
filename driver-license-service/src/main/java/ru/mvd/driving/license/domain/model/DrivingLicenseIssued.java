@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @AllArgsConstructor
-public class DrivingLicenseCreated implements DomainEvent {
+public class DrivingLicenseIssued implements DomainEvent {
     private DrivingLicenseId drivingLicenseId;
     private DepartmentId departmentId;
     private PersonId personId;

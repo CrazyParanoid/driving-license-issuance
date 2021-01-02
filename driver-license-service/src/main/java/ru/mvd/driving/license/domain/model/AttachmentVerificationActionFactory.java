@@ -24,33 +24,33 @@ public class AttachmentVerificationActionFactory {
 
     private Function<List<Attachment>, Boolean> makeBasisVerification(){
         return (attachments) -> {
-            boolean statementExists = isAttachmentsContainsType(attachments, STATEMENT);
-            boolean medicalReportExists = isAttachmentsContainsType(attachments, MEDICAL_REPORT);
-            boolean paymentReceiptExists = isAttachmentsContainsType(attachments, PAYMENT_RECEIPT);
+            boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
+            boolean medicalReportExists = areAttachmentsContainType(attachments, MEDICAL_REPORT);
+            boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
             return statementExists & medicalReportExists & paymentReceiptExists;
         };
     }
 
     private Function<List<Attachment>, Boolean> makeFirstIssuanceVerification(){
         return (attachments) -> {
-            boolean statementExists = isAttachmentsContainsType(attachments, STATEMENT);
-            boolean medicalReportExists = isAttachmentsContainsType(attachments, MEDICAL_REPORT);
-            boolean paymentReceiptExists = isAttachmentsContainsType(attachments, PAYMENT_RECEIPT);
-            boolean drivingSchoolGraduationCertificateExists = isAttachmentsContainsType(attachments, DRIVING_SCHOOL_GRADUATION_CERTIFICATE);
+            boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
+            boolean medicalReportExists = areAttachmentsContainType(attachments, MEDICAL_REPORT);
+            boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
+            boolean drivingSchoolGraduationCertificateExists = areAttachmentsContainType(attachments, DRIVING_SCHOOL_GRADUATION_CERTIFICATE);
             return statementExists & medicalReportExists & paymentReceiptExists & drivingSchoolGraduationCertificateExists;
         };
     }
 
     private Function<List<Attachment>, Boolean> makePersonNameDetailsChangeVerification(){
         return (attachments) -> {
-            boolean statementExists = isAttachmentsContainsType(attachments, STATEMENT);
-            boolean paymentReceiptExists = isAttachmentsContainsType(attachments, PAYMENT_RECEIPT);
-            boolean confirmationExists = isAttachmentsContainsType(attachments, CONFIRMATION_CHANGE_VALIDITY);
+            boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
+            boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
+            boolean confirmationExists = areAttachmentsContainType(attachments, CONFIRMATION_CHANGE_VALIDITY);
             return statementExists & paymentReceiptExists & confirmationExists;
         };
     }
 
-    private boolean isAttachmentsContainsType(List<Attachment> attachments, AttachmentType attachmentType){
+    private boolean areAttachmentsContainType(List<Attachment> attachments, AttachmentType attachmentType){
         return attachments.stream().anyMatch(attachment -> attachment.getAttachmentType() == attachmentType);
     }
 

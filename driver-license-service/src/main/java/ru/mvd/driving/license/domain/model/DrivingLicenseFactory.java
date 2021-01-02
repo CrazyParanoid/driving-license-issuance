@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -23,15 +24,12 @@ public class DrivingLicenseFactory {
         this.drivingLicenseRepository = drivingLicenseRepository;
     }
 
-    public DrivingLicense newDrivingLicenseFrom(CreateDrivingLicencePayloadObject domainPayloadObject){
-        LocalDate endDate = calculateEndDate(domainPayloadObject);
-        IssuanceReason issuanceReason = domainPayloadObject.getIssuanceReason();
-        DrivingLicenseId drivingLicenseId = drivingLicenseRepository.nextIdentity(domainPayloadObject.getAreaCode());
-        DepartmentId departmentId = domainPayloadObject.getDepartmentId();
-        PersonId personId = domainPayloadObject.getPersonId();
-        Set<Category> categories = domainPayloadObject.getCategories();
-        Set<DrivingLicense.SpecialMark> specialMarks = domainPayloadObject.getSpecialMarks();
-        List<Attachment> attachments = domainPayloadObject.getAttachments();
+    public DrivingLicense issueDrivingLicense(IssuanceReason issuanceReason, PersonId personId,
+                                              Set<Category> categories, List<Attachment> attachments,
+                                              DepartmentId departmentId, AreaCode areaCode,
+                                              DrivingLicenseId previousDrivingLicenseId, Set<DrivingLicense.SpecialMark> specialMarks) {
+        LocalDate endDate = calculateEndDate(issuanceReason, attachments, previousDrivingLicenseId);
+        DrivingLicenseId drivingLicenseId = identifyDrivingLicense(previousDrivingLicenseId, areaCode);
         LocalDate startDate = LocalDate.now();
         DrivingLicense drivingLicense = new DrivingLicense(new ArrayList<>(), drivingLicenseId, departmentId,
                 personId, startDate, endDate, categories, specialMarks, attachments,
@@ -40,17 +38,29 @@ public class DrivingLicenseFactory {
                 .makeVerificationActionForReason(issuanceReason);
         drivingLicense.verifyAttachmentCompleteness(verificationAction);
         drivingLicense.openSubCategories();
-        drivingLicense.raiseDomainEvent(new DrivingLicenseCreated(drivingLicenseId, departmentId, personId,
-                startDate, endDate, categories, specialMarks));
+        drivingLicense.raiseDomainEvent(new DrivingLicenseIssued(drivingLicenseId,
+                departmentId,
+                personId,
+                startDate,
+                endDate,
+                categories,
+                specialMarks));
         return drivingLicense;
     }
-    private LocalDate calculateEndDate(CreateDrivingLicencePayloadObject domainPayloadObject){
-        IssuanceReason issuanceReason = domainPayloadObject.getIssuanceReason();
-        List<Attachment> attachments = domainPayloadObject.getAttachments();
-        if(issuanceReason == IssuanceReason.PERSON_NAME_DETAILS_CHANGE){
-            if(isMedicalReportExists(attachments)){
-                DrivingLicense drivingLicense = drivingLicenseRepository
-                        .findByDrivingLicenseId(domainPayloadObject.getPreviousDrivingLicenseId());
+
+    private DrivingLicenseId identifyDrivingLicense(DrivingLicenseId previousDrivingLicenseId, AreaCode areaCode) {
+        if (Objects.isNull(previousDrivingLicenseId))
+            return drivingLicenseRepository.nextIdentity(areaCode);
+        return previousDrivingLicenseId;
+    }
+
+    private LocalDate calculateEndDate(IssuanceReason issuanceReason, List<Attachment> attachments,
+                                       DrivingLicenseId previousDrivingLicenseId) {
+        if (issuanceReason == IssuanceReason.PERSON_NAME_DETAILS_CHANGE) {
+            if (isMedicalReportExists(attachments)) {
+                if (Objects.isNull(previousDrivingLicenseId))
+                    throw new IllegalArgumentException("PreviousDrivingLicenseId can't be null");
+                DrivingLicense drivingLicense = drivingLicenseRepository.findByDrivingLicenseId(previousDrivingLicenseId);
                 return drivingLicense.getEndDate();
             }
         }
@@ -58,7 +68,7 @@ public class DrivingLicenseFactory {
         return startDate.plusYears(DRIVING_LICENSE_VALID_YEAR_PERIOD);
     }
 
-    private boolean isMedicalReportExists(List<Attachment> attachments){
+    private boolean isMedicalReportExists(List<Attachment> attachments) {
         return attachments.stream()
                 .anyMatch(attachment -> attachment.getAttachmentType() == Attachment.AttachmentType.MEDICAL_REPORT);
     }

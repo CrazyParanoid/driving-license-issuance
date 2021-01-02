@@ -16,11 +16,11 @@ public enum IssuanceReason {
     @Getter(AccessLevel.PRIVATE)
     private final String name;
 
-    static IssuanceReason fromName(String name){
+    public static IssuanceReason fromName(String name){
         for(IssuanceReason issuanceReason: IssuanceReason.values()){
             if(issuanceReason.getName().equals(name))
                 return issuanceReason;
         }
-        return UNKNOWN;
+        throw new IllegalArgumentException(String.format("Unknown issuance reason type %s", name));
     }
 }

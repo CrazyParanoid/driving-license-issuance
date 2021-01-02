@@ -18,18 +18,18 @@ public class Revocation implements Entity {
     private LocalDate endDate;
     private boolean expired;
 
-    boolean isExpired(){
+    boolean isExpired() {
         return this.expired;
     }
 
-    void defineExpiration(){
-        if(!isExpired()){
+    void defineExpiration() {
+        if (!isExpired()) {
             LocalDate currentDate = LocalDate.now();
             this.expired = this.endDate.isEqual(currentDate) || currentDate.isAfter(this.endDate);
         }
     }
 
-    public void prolong(LocalDate endDate){
+    void prolong(LocalDate endDate) {
         this.endDate = endDate;
         this.expired = false;
     }

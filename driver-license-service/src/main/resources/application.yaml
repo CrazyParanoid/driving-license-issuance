@@ -1,11 +1,7 @@
-spring.profiles.active: develop
-spring.main.allow-bean-definition-overriding: true
-
-server.port: 8080
-
 spring:
   application:
     name: driving-license-service
-  data:
-    mongodb:
-      uri: mongodb://mongo1:50001,mongo2:50002,mongo3:50003/test?replicaSet=docker-rs
+
+delay:
+  revocation: 5000
+  driving-license: 5000

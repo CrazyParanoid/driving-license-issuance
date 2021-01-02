@@ -1,7 +1,7 @@
 package ru.mvd.driving.license.application;
 
-public interface CommandProcessor<T extends Command> {
+public interface CommandProcessor<T extends Command, R> {
 
-    void process(T command);
+    R process(T command);
 
 }

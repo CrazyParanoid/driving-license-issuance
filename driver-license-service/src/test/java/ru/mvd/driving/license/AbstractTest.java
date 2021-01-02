@@ -1,57 +1,109 @@
 package ru.mvd.driving.license;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.domain.model.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Objects;
+
+import static ru.mvd.driving.license.TestValues.*;
+import static ru.mvd.driving.license.TestValues.PROLONGED_REVOCATION_END_DATE;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public abstract class AbstractTest {
+    @MockBean
+    protected DrivingLicenseRepository drivingLicenseRepository;
     @Autowired
     protected DrivingLicenseFactory drivingLicenseFactory;
 
-    protected static final String DEPARTMENT_ID = "113667";
-    protected static final String PERSON_ID = "258890";
-    protected static final String ISSUANCE_REASON = "FIRST_ISSUANCE";
-    protected static final String AREA_CODE = "77";
-    protected static final LocalDate REVOCATION_END_DATE = LocalDate.of(2030, 3, 12);
-    protected static final LocalDate PROLONGED_REVOCATION_END_DATE = LocalDate.of(2032, 6, 24);
-    protected static final String JUDGMENT_NUMBER = "43367812";
-
-    protected Set<Category> createCategories(){
-        Set<Category> categories = new HashSet<>();
-        Set<DrivingLicense.SpecialMark> specialMarks = new HashSet<>();
-        categories.add(Category.open(Category.CategoryType.B, LocalDate.now(),
-                LocalDate.of(2024, 10, 12), specialMarks));
-        return categories;
+    @Before
+    public void init() {
+        Mockito.when(drivingLicenseRepository.nextIdentity(
+                ArgumentMatchers.any(AreaCode.class)))
+                .thenReturn(new DrivingLicenseId(SERIES, NUMBER));
     }
 
-    protected List<Attachment> createAttachments(){
-        List<Attachment> attachments = new ArrayList<>();
-        attachments.add(Attachment.newAttachment(Attachment.AttachmentType.STATEMENT, UUID.randomUUID().toString()));
-        attachments.add(Attachment.newAttachment(Attachment.AttachmentType.MEDICAL_REPORT, UUID.randomUUID().toString()));
-        attachments.add(Attachment.newAttachment(Attachment.AttachmentType.PAYMENT_RECEIPT, UUID.randomUUID().toString()));
-        attachments.add(Attachment.newAttachment(Attachment.AttachmentType.DRIVING_SCHOOL_GRADUATION_CERTIFICATE, UUID.randomUUID().toString()));
-        return attachments;
+    protected void assertDrivingLicenseRevokedDomainEvent(DrivingLicenseRevoked domainEvent) {
+        Assert.assertNotNull(domainEvent.getDrivingLicenseId());
+        Assert.assertNotNull(domainEvent.getRevocationEndDate());
+        Assert.assertEquals(domainEvent.getRevocationEndDate(), REVOCATION_END_DATE);
+        Assert.assertNotNull(domainEvent.getRevocationStartDate());
+        Assert.assertEquals(domainEvent.getRevocationStartDate(), LocalDate.now());
+        Assert.assertNotNull(domainEvent.getRevocationId());
     }
 
-    protected DrivingLicense newDrivingLicense(Set<Category> categories, List<Attachment> attachments){
-        CreateDrivingLicencePayloadObject domainPayloadObject = CreateDrivingLicencePayloadObject.newCreateDrivingLicencePayloadObject()
-                .withArea(AREA_CODE)
-                .withAttachments(attachments)
-                .withCategories(categories)
-                .withDepartment(DEPARTMENT_ID)
-                .withPerson(PERSON_ID)
-                .withIssuanceReason(ISSUANCE_REASON)
-                .withSpecialMarks(new HashSet<>())
-                .build();
-        return drivingLicenseFactory.newDrivingLicenseFrom(domainPayloadObject);
+    protected void assertDrivingLicenseId(DrivingLicenseId drivingLicenseId) {
+        String series = (String) ReflectionTestUtils.getField(drivingLicenseId, "series");
+        String number = (String) ReflectionTestUtils.getField(drivingLicenseId, "number");
+
+        Assert.assertNotNull(drivingLicenseId);
+        Assert.assertEquals(series, SERIES);
+        Assert.assertEquals(number, NUMBER);
     }
 
+    protected void assertDrivingLicenseIssuedDomainEvent(DrivingLicenseIssued domainEvent) {
+        Assert.assertNotNull(domainEvent);
+        Assert.assertNotNull(domainEvent.getCategories());
+        Assert.assertNotNull(domainEvent.getDepartmentId());
+        Assert.assertEquals(domainEvent.getDepartmentId(), DEPARTMENT_ID);
+        Assert.assertNotNull(domainEvent.getPersonId());
+        Assert.assertEquals(domainEvent.getPersonId(), PERSON_ID);
+        Assert.assertNotNull(domainEvent.getStartDate());
+        Assert.assertNotNull(domainEvent.getEndDate());
+    }
 
+    protected void assertDrivingLicenseRevocationProlongedDomainEvent(DrivingLicenseRevocationProlonged domainEvent) {
+        Assert.assertNotNull(domainEvent.getDrivingLicenseId());
+        Assert.assertNotNull(domainEvent.getRevocationEndDate());
+        Assert.assertEquals(domainEvent.getRevocationEndDate(), PROLONGED_REVOCATION_END_DATE);
+        Assert.assertNotNull(domainEvent.getRevocationId());
+    }
+
+    protected void assertDrivingLicenseDisabledDomainEvent(DrivingLicenseDisabled domainEvent) {
+        Assert.assertNotNull(domainEvent.getDrivingLicenseId());
+    }
+
+    protected void assertProlongedRevokeDrivingLicense(DrivingLicense drivingLicense) {
+        Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
+        LocalDate revocationEndDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
+
+        Assert.assertNotNull(revocation);
+        Assert.assertNotNull(revocationEndDate);
+        Assert.assertEquals(revocationEndDate, PROLONGED_REVOCATION_END_DATE);
+    }
+
+    protected void assertRevokeDrivingLicense(DrivingLicense drivingLicense) {
+        Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
+        DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
+        RevocationId revocationId = (RevocationId) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "revocationId");
+        LocalDate revocationStartDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "startDate");
+        LocalDate revocationEndDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
+        Boolean expired = (Boolean) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "expired");
+
+        Assert.assertNotNull(status);
+        Assert.assertEquals(status, DrivingLicense.Status.REVOKED);
+        Assert.assertNotNull(revocation);
+        Assert.assertNotNull(revocationId);
+        Assert.assertNotNull(revocationStartDate);
+        Assert.assertEquals(revocationStartDate, LocalDate.now());
+        Assert.assertEquals(revocationEndDate, REVOCATION_END_DATE);
+        Assert.assertFalse(expired);
+    }
+
+    protected void assertDisabledDrivingLicense(DrivingLicense drivingLicense) {
+        DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
+
+        Assert.assertNotNull(status);
+        Assert.assertEquals(status, DrivingLicense.Status.INVALID);
+    }
 }

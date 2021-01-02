@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.mvd.driving.license.domain.model.*;
 
+import java.util.Objects;
+
 @Service
-public class RevokeDrivingLicenseCommandProcessor implements CommandProcessor<RevokeDrivingLicenseCommand>{
+public class RevokeDrivingLicenseCommandProcessor implements CommandProcessor<RevokeDrivingLicenseCommand, String> {
     private final DrivingLicenseRepository drivingLicenseRepository;
     private final DomainEventPublisher<DrivingLicenseRevoked> drivingLicenseRevokedDomainEventPublisher;
 
@@ -17,11 +19,13 @@ public class RevokeDrivingLicenseCommandProcessor implements CommandProcessor<Re
     }
 
     @Override
-    public void process(RevokeDrivingLicenseCommand command) {
+    public String process(RevokeDrivingLicenseCommand command) {
         DrivingLicenseId drivingLicenseId = DrivingLicenseId.identifyFrom(command.getDrivingLicenseId());
         DrivingLicense drivingLicense = drivingLicenseRepository.findByDrivingLicenseId(drivingLicenseId);
         drivingLicense.revoke(command.getRevocationEndDate(), command.getJudgmentFileId());
         DrivingLicenseRevoked domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseRevoked.class);
         drivingLicenseRevokedDomainEventPublisher.publish(domainEvent);
+        drivingLicenseRepository.save(drivingLicense);
+        return Objects.requireNonNull(drivingLicenseId).toFullNumber();
     }
 }
