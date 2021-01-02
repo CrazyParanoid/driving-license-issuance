@@ -8,7 +8,7 @@ import ru.mvd.driving.license.application.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/driving-license")
+@RequestMapping("/api/driving-licenses")
 public class DrivingLicenseController {
     private final CommandProcessor<IssueDrivingLicenseCommand, String> issueDrivingLicenseCommandProcessor;
     private final CommandProcessor<DisableDrivingLicenseCommand, String> disableDrivingLicenseCommandProcessor;
@@ -34,21 +34,21 @@ public class DrivingLicenseController {
     }
 
     @PostMapping("/disable")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postDisableDrivingLicenseCommand(@RequestBody @Valid DisableDrivingLicenseCommand command) {
         String id = disableDrivingLicenseCommandProcessor.process(command);
         return createResponse(id);
     }
 
     @PostMapping("/revocation")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postRevokeDrivingLicenseCommand(@RequestBody @Valid RevokeDrivingLicenseCommand command) {
         String id = revokeDrivingLicenseCommandProcessor.process(command);
         return createResponse(id);
     }
 
     @PostMapping("/revocation/prolong")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postProlongRevocationCommand(@RequestBody @Valid ProlongRevocationCommand command) {
         String id = prolongRevocationCommandProcessor.process(command);
         return createResponse(id);

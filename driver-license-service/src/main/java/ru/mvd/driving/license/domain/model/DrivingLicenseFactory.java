@@ -31,9 +31,17 @@ public class DrivingLicenseFactory {
         LocalDate endDate = calculateEndDate(issuanceReason, attachments, previousDrivingLicenseId);
         DrivingLicenseId drivingLicenseId = identifyDrivingLicense(previousDrivingLicenseId, areaCode);
         LocalDate startDate = LocalDate.now();
-        DrivingLicense drivingLicense = new DrivingLicense(new ArrayList<>(), drivingLicenseId, departmentId,
-                personId, startDate, endDate, categories, specialMarks, attachments,
-                DrivingLicense.Status.VALID, issuanceReason);
+        DrivingLicense drivingLicense = new DrivingLicense(new ArrayList<>(),
+                drivingLicenseId,
+                departmentId,
+                personId,
+                startDate,
+                endDate,
+                categories,
+                specialMarks,
+                attachments,
+                DrivingLicense.Status.VALID,
+                issuanceReason);
         Function<List<Attachment>, Boolean> verificationAction = attachmentVerificationActionFactory
                 .makeVerificationActionForReason(issuanceReason);
         drivingLicense.verifyAttachmentCompleteness(verificationAction);

@@ -19,7 +19,7 @@ public class TestCommandFactory {
     private static final String B_CATEGORY = "B";
     private static final String AS_SPECIAL_MARK = "AS";
 
-    IssueDrivingLicenseCommand createIssueDrivingLicenseCommand() {
+    public IssueDrivingLicenseCommand createIssueDrivingLicenseCommand() {
         return new IssueDrivingLicenseCommand(
                 DEPARTMENT_ID,
                 PERSON_ID,
@@ -32,7 +32,20 @@ public class TestCommandFactory {
         );
     }
 
-    RevokeDrivingLicenseCommand createRevokeDrivingLicenseCommand(){
+    public IssueDrivingLicenseCommand createInvalidIssueDrivingLicenseCommand() {
+        return new IssueDrivingLicenseCommand(
+                DEPARTMENT_ID,
+                null,
+                AREA_CODE,
+                null,
+                createCategories(),
+                Set.of(AS_SPECIAL_MARK),
+                ISSUANCE_REASON,
+                null
+        );
+    }
+
+    public RevokeDrivingLicenseCommand createRevokeDrivingLicenseCommand(){
         return new RevokeDrivingLicenseCommand(
                 SERIES + NUMBER,
                 REVOCATION_END_DATE,
@@ -40,11 +53,11 @@ public class TestCommandFactory {
         );
     }
 
-    DisableDrivingLicenseCommand createDisableDrivingLicenseCommand(){
+    public DisableDrivingLicenseCommand createDisableDrivingLicenseCommand(){
         return new DisableDrivingLicenseCommand(SERIES + NUMBER);
     }
 
-    ProlongRevocationCommand createProlongRevocationCommand(){
+    public ProlongRevocationCommand createProlongRevocationCommand(){
         return new ProlongRevocationCommand(
                 SERIES + NUMBER,
                 PROLONGED_REVOCATION_END_DATE,

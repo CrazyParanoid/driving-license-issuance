@@ -25,7 +25,6 @@ public class IssueDrivingLicenseCommand implements Command{
     private Set<@Valid AttachmentDTO> attachments;
     @NotEmpty(message = "categories can't be empty")
     private Set<@Valid CategoryDTO> categories;
-    @NotEmpty(message = "specialMarks can't be empty")
     private Set<String> specialMarks;
     @NotEmpty(message = "issuanceReason can't be null or empty")
     private String issuanceReason;
@@ -50,7 +49,6 @@ public class IssueDrivingLicenseCommand implements Command{
         private LocalDate endDate;
         @NotEmpty(message = "categoryType can't be null or empty")
         private String categoryType;
-        @NotEmpty(message = "specialMarks can't be empty")
         private Set<String> specialMarks;
     }
 
