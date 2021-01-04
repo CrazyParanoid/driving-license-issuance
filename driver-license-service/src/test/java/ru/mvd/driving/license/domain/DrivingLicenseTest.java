@@ -6,13 +6,11 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.AbstractTest;
-import ru.mvd.driving.license.Application;
 import ru.mvd.driving.license.domain.model.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +18,6 @@ import java.util.Set;
 import static ru.mvd.driving.license.TestValues.*;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {Application.class})
 public class DrivingLicenseTest extends AbstractTest {
     @Autowired
     private TestDomainObjectsFactory testDomainObjectsFactory;
@@ -144,7 +141,7 @@ public class DrivingLicenseTest extends AbstractTest {
     @Test
     public void testDisableDrivingLicenseIfExpired() {
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
-        ReflectionTestUtils.setField(drivingLicense, "endDate", LocalDate.of(2019, 2, 14));
+        ReflectionTestUtils.setField(drivingLicense, "endDate", LocalDateTime.of(2019, 2, 14, 22, 45));
 
         drivingLicense.disableIfExpired();
         DrivingLicenseDisabled domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseDisabled.class);
@@ -158,7 +155,7 @@ public class DrivingLicenseTest extends AbstractTest {
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
         drivingLicense.revoke(REVOCATION_END_DATE, JUDGMENT_FILE_ID);
         Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
-        ReflectionTestUtils.setField(Objects.requireNonNull(revocation), "endDate", LocalDate.of(2019, 2, 14));
+        ReflectionTestUtils.setField(Objects.requireNonNull(revocation), "endDate", LocalDateTime.of(2019, 2, 14, 22, 45));
         ReflectionTestUtils.setField(Objects.requireNonNull(drivingLicense), "revocation", revocation);
 
         drivingLicense.disableIfRevocationExpired();
@@ -172,8 +169,8 @@ public class DrivingLicenseTest extends AbstractTest {
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         DrivingLicenseId drivingLicenseId = (DrivingLicenseId) ReflectionTestUtils.getField(drivingLicense, "drivingLicenseId");
         PersonId personId = (PersonId) ReflectionTestUtils.getField(drivingLicense, "personId");
-        LocalDate startDate = (LocalDate) ReflectionTestUtils.getField(drivingLicense, "startDate");
-        LocalDate endDate = (LocalDate) ReflectionTestUtils.getField(drivingLicense, "endDate");
+        LocalDateTime startDate = (LocalDateTime) ReflectionTestUtils.getField(drivingLicense, "startDate");
+        LocalDateTime endDate = (LocalDateTime) ReflectionTestUtils.getField(drivingLicense, "endDate");
         Set<Category> aCategories = (Set<Category>) ReflectionTestUtils.getField(drivingLicense, "categories");
         List<Attachment> anAttachments = (List<Attachment>) ReflectionTestUtils.getField(drivingLicense, "attachments");
         Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
@@ -187,7 +184,6 @@ public class DrivingLicenseTest extends AbstractTest {
         Assert.assertNotNull(personId);
         Assert.assertNotNull(startDate);
         Assert.assertNotNull(endDate);
-        Assert.assertEquals(endDate, startDate.plusYears(DrivingLicense.DRIVING_LICENSE_VALID_YEAR_PERIOD));
         Assert.assertNotNull(anAttachments);
         Assert.assertEquals(attachments, anAttachments);
         Assert.assertNull(revocation);

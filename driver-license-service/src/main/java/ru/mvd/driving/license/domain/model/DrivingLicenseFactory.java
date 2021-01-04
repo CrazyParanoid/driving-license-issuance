@@ -3,7 +3,7 @@ package ru.mvd.driving.license.domain.model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,11 +28,10 @@ public class DrivingLicenseFactory {
                                               Set<Category> categories, List<Attachment> attachments,
                                               DepartmentId departmentId, AreaCode areaCode,
                                               DrivingLicenseId previousDrivingLicenseId, Set<DrivingLicense.SpecialMark> specialMarks) {
-        LocalDate endDate = calculateEndDate(issuanceReason, attachments, previousDrivingLicenseId);
+        LocalDateTime endDate = calculateEndDate(issuanceReason, attachments, previousDrivingLicenseId);
         DrivingLicenseId drivingLicenseId = identifyDrivingLicense(previousDrivingLicenseId, areaCode);
-        LocalDate startDate = LocalDate.now();
-        DrivingLicense drivingLicense = new DrivingLicense(new ArrayList<>(),
-                drivingLicenseId,
+        LocalDateTime startDate = LocalDateTime.now();
+        DrivingLicense drivingLicense = new DrivingLicense(drivingLicenseId,
                 departmentId,
                 personId,
                 startDate,
@@ -41,18 +40,13 @@ public class DrivingLicenseFactory {
                 specialMarks,
                 attachments,
                 DrivingLicense.Status.VALID,
-                issuanceReason);
+                issuanceReason,
+                new ArrayList<>());
         Function<List<Attachment>, Boolean> verificationAction = attachmentVerificationActionFactory
                 .makeVerificationActionForReason(issuanceReason);
         drivingLicense.verifyAttachmentCompleteness(verificationAction);
         drivingLicense.openSubCategories();
-        drivingLicense.raiseDomainEvent(new DrivingLicenseIssued(drivingLicenseId,
-                departmentId,
-                personId,
-                startDate,
-                endDate,
-                categories,
-                specialMarks));
+        drivingLicense.registerDrivingLicenseIssuedDomainEvent();
         return drivingLicense;
     }
 
@@ -62,7 +56,7 @@ public class DrivingLicenseFactory {
         return previousDrivingLicenseId;
     }
 
-    private LocalDate calculateEndDate(IssuanceReason issuanceReason, List<Attachment> attachments,
+    private LocalDateTime calculateEndDate(IssuanceReason issuanceReason, List<Attachment> attachments,
                                        DrivingLicenseId previousDrivingLicenseId) {
         if (issuanceReason == IssuanceReason.PERSON_NAME_DETAILS_CHANGE) {
             if (isMedicalReportExists(attachments)) {
@@ -72,7 +66,7 @@ public class DrivingLicenseFactory {
                 return drivingLicense.getEndDate();
             }
         }
-        LocalDate startDate = LocalDate.now();
+        LocalDateTime startDate = LocalDateTime.now();
         return startDate.plusYears(DRIVING_LICENSE_VALID_YEAR_PERIOD);
     }
 

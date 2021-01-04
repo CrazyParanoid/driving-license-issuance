@@ -5,6 +5,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.domain.model.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static ru.mvd.driving.license.TestValues.*;
@@ -92,7 +93,7 @@ public class TestDomainObjectsFactory {
 
     public DrivingLicense newDrivingLicenseWithExpiredRevocation() {
         DrivingLicense drivingLicense = newDrivingLicense();
-        LocalDate revocationEndDate = LocalDate.of(2020, 3, 12);
+        LocalDateTime revocationEndDate = LocalDateTime.of(2020, 3, 12, 22, 45);
         drivingLicense.revoke(revocationEndDate, JUDGMENT_FILE_ID);
         return drivingLicense;
     }
@@ -105,7 +106,7 @@ public class TestDomainObjectsFactory {
 
     public DrivingLicense newExpiredDrivingLicense() {
         DrivingLicense drivingLicense = newDrivingLicense();
-        ReflectionTestUtils.setField(drivingLicense, "endDate", LocalDate.of(2019, 2, 14));
+        ReflectionTestUtils.setField(drivingLicense, "endDate", LocalDateTime.of(2019, 2, 14, 22, 45));
         return drivingLicense;
     }
 

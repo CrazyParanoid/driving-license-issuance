@@ -14,4 +14,5 @@ public interface DrivingLicenseRepository {
 
     DrivingLicenseId nextIdentity(AreaCode areaCode);
 
+    void deleteAll();
 }

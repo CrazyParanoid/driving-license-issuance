@@ -1,6 +1,5 @@
 package ru.mvd.driving.license.domain.model;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +12,7 @@ public enum IssuanceReason {
     DAMAGE("DAMAGE"),
     UNKNOWN("UNKNOWN");
 
-    @Getter(AccessLevel.PRIVATE)
+    @Getter
     private final String name;
 
     public static IssuanceReason fromName(String name){

@@ -1,13 +1,12 @@
 package ru.mvd.driving.license.domain.model;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import ru.mvd.driving.license.domain.supertype.ValueObject;
 
 import java.util.Objects;
 
-@Getter(AccessLevel.PACKAGE)
+@Getter
 @AllArgsConstructor
 public class PersonId implements ValueObject {
     private String id;

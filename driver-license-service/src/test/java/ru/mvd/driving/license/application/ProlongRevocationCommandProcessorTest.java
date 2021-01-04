@@ -8,19 +8,19 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import ru.mvd.driving.license.AbstractTest;
-import ru.mvd.driving.license.Application;
+import ru.mvd.driving.license.config.MongoCustomizationConfiguration;
 import ru.mvd.driving.license.domain.TestDomainObjectsFactory;
-import ru.mvd.driving.license.domain.model.DomainEventPublisher;
 import ru.mvd.driving.license.domain.model.DrivingLicense;
 import ru.mvd.driving.license.domain.model.DrivingLicenseId;
 import ru.mvd.driving.license.domain.model.DrivingLicenseRevocationProlonged;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {Application.class})
+@Import(MongoCustomizationConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ProlongRevocationCommandProcessorTest extends AbstractTest {
     @Autowired
     private CommandProcessor<ProlongRevocationCommand, String> prolongRevocationCommandProcessor;
@@ -28,12 +28,8 @@ public class ProlongRevocationCommandProcessorTest extends AbstractTest {
     private TestDomainObjectsFactory testDomainObjectsFactory;
     @Autowired
     private TestCommandFactory testCommandFactory;
-    @MockBean
-    private DomainEventPublisher<DrivingLicenseRevocationProlonged> drivingLicenseRevocationProlongedDomainEventPublisher;
     @Captor
     private ArgumentCaptor<DrivingLicense> drivingLicenseArgumentCaptor;
-    @Captor
-    private ArgumentCaptor<DrivingLicenseRevocationProlonged> drivingLicenseRevocationProlongedArgumentCaptor;
 
     @Before
     public void setup() {
@@ -49,11 +45,9 @@ public class ProlongRevocationCommandProcessorTest extends AbstractTest {
         String id = prolongRevocationCommandProcessor.process(command);
 
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
-        Mockito.verify(drivingLicenseRevocationProlongedDomainEventPublisher)
-                .publish(drivingLicenseRevocationProlongedArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseRevocationProlonged drivingLicenseRevocationProlongedDomainEvent =
-                drivingLicenseRevocationProlongedArgumentCaptor.getValue();
+        DrivingLicenseRevocationProlonged drivingLicenseRevocationProlongedDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseRevocationProlonged.class);
         Assert.assertNotNull(id);
         assertProlongedRevokeDrivingLicense(drivingLicense);
         assertDrivingLicenseRevocationProlongedDomainEvent(drivingLicenseRevocationProlongedDomainEvent);

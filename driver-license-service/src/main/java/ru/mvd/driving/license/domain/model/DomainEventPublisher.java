@@ -2,8 +2,10 @@ package ru.mvd.driving.license.domain.model;
 
 import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
-public interface DomainEventPublisher<T extends DomainEvent> {
+import java.util.List;
 
-    void publish(T domainEvent);
+public interface DomainEventPublisher {
+
+    void publish(List<DomainEvent> domainEvents);
 
 }

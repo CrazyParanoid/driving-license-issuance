@@ -1,18 +1,21 @@
 package ru.mvd.driving.license.domain.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import ru.mvd.driving.license.domain.supertype.ValueObject;
 
 import java.util.Objects;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Attachment implements ValueObject {
     @Getter(AccessLevel.PACKAGE)
     private AttachmentType attachmentType;
+    @Getter
     private String fileId;
+
+    public String attachmentTypeToString(){
+        return this.attachmentType.getName();
+    }
 
     public static Attachment newAttachment(String anAttachment, String fileId){
         Attachment.AttachmentType attachmentType = Attachment.AttachmentType.fromName(anAttachment);

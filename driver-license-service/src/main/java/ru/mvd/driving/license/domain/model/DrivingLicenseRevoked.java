@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 public class DrivingLicenseRevoked implements DomainEvent {
     private DrivingLicenseId drivingLicenseId;
     private RevocationId revocationId;
     @Getter
-    private LocalDate revocationStartDate;
+    private LocalDateTime revocationStartDate;
     @Getter
-    private LocalDate revocationEndDate;
+    private LocalDateTime revocationEndDate;
 
     public String getDrivingLicenseId(){
         return this.drivingLicenseId.toFullNumber();

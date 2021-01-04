@@ -3,26 +3,29 @@ package ru.mvd.driving.license.application;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mvd.driving.license.domain.model.*;
+import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
 import java.util.*;
 
 @Service
 public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<IssueDrivingLicenseCommand, String> {
     private final DrivingLicenseRepository drivingLicenseRepository;
-    private final DomainEventPublisher<DrivingLicenseIssued> drivingLicenseIssuedDomainEventPublisher;
     private final DrivingLicenseFactory drivingLicenseFactory;
+    private final DomainEventPublisher domainEventPublisher;
 
     @Autowired
     public IssueDrivingLicenseCommandProcessor(DrivingLicenseRepository drivingLicenseRepository,
-                                               DomainEventPublisher<DrivingLicenseIssued> drivingLicenseIssuedDomainEventPublisher,
-                                               DrivingLicenseFactory drivingLicenseFactory) {
+                                               DrivingLicenseFactory drivingLicenseFactory,
+                                               DomainEventPublisher domainEventPublisher) {
         this.drivingLicenseRepository = drivingLicenseRepository;
-        this.drivingLicenseIssuedDomainEventPublisher = drivingLicenseIssuedDomainEventPublisher;
         this.drivingLicenseFactory = drivingLicenseFactory;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
+    @Transactional
     public String process(IssueDrivingLicenseCommand command) {
         deduplicate(command.getPersonId());
         Set<Category> categories = categoriesFrom(command.getCategories());
@@ -36,8 +39,8 @@ public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<Iss
                 new AreaCode(command.getAreaCode()),
                 DrivingLicenseId.identifyFrom(command.getPreviousDrivingLicenseId()),
                 DrivingLicense.SpecialMark.setFrom(command.getSpecialMarks()));
-        DrivingLicenseIssued domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseIssued.class);
-        drivingLicenseIssuedDomainEventPublisher.publish(domainEvent);
+        List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
+        domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
         DrivingLicenseId drivingLicenseId = drivingLicense.getDrivingLicenseId();
         return drivingLicenseId.toFullNumber();

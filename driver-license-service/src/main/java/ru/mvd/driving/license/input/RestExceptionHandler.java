@@ -8,6 +8,8 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.mvd.driving.license.infrastructure.persistence.DrivingLicenseNotFoundException;
+import ru.mvd.driving.license.infrastructure.persistence.RepositoryAccessException;
 
 import java.util.List;
 
@@ -25,6 +27,16 @@ public class RestExceptionHandler {
         log.error(reason.toString());
 
         return new ResponseEntity<>(reason.toString(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RepositoryAccessException.class)
+    private ResponseEntity<String> catchRepositoryAccessException(RepositoryAccessException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DrivingLicenseNotFoundException.class)
+    private ResponseEntity<String> catchDrivingLicenseNotFoundException(DrivingLicenseNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -27,7 +27,9 @@ public class AttachmentVerificationActionFactory {
             boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
             boolean medicalReportExists = areAttachmentsContainType(attachments, MEDICAL_REPORT);
             boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
-            return statementExists & medicalReportExists & paymentReceiptExists;
+            return statementExists
+                    & medicalReportExists
+                    & paymentReceiptExists;
         };
     }
 
@@ -36,8 +38,12 @@ public class AttachmentVerificationActionFactory {
             boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
             boolean medicalReportExists = areAttachmentsContainType(attachments, MEDICAL_REPORT);
             boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
-            boolean drivingSchoolGraduationCertificateExists = areAttachmentsContainType(attachments, DRIVING_SCHOOL_GRADUATION_CERTIFICATE);
-            return statementExists & medicalReportExists & paymentReceiptExists & drivingSchoolGraduationCertificateExists;
+            boolean drivingSchoolGraduationCertificateExists =
+                    areAttachmentsContainType(attachments, DRIVING_SCHOOL_GRADUATION_CERTIFICATE);
+            return statementExists
+                    & medicalReportExists
+                    & paymentReceiptExists
+                    & drivingSchoolGraduationCertificateExists;
         };
     }
 
@@ -46,12 +52,15 @@ public class AttachmentVerificationActionFactory {
             boolean statementExists = areAttachmentsContainType(attachments, STATEMENT);
             boolean paymentReceiptExists = areAttachmentsContainType(attachments, PAYMENT_RECEIPT);
             boolean confirmationExists = areAttachmentsContainType(attachments, CONFIRMATION_CHANGE_VALIDITY);
-            return statementExists & paymentReceiptExists & confirmationExists;
+            return statementExists
+                    & paymentReceiptExists
+                    & confirmationExists;
         };
     }
 
     private boolean areAttachmentsContainType(List<Attachment> attachments, AttachmentType attachmentType){
-        return attachments.stream().anyMatch(attachment -> attachment.getAttachmentType() == attachmentType);
+        return attachments.stream()
+                .anyMatch(attachment -> attachment.getAttachmentType() == attachmentType);
     }
 
 }

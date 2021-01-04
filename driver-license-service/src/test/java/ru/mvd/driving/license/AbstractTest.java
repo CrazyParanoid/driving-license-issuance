@@ -12,13 +12,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.domain.model.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static ru.mvd.driving.license.TestValues.*;
-import static ru.mvd.driving.license.TestValues.PROLONGED_REVOCATION_END_DATE;
 
-@SpringBootTest
+@SpringBootTest(classes = Application.class)
 @RunWith(SpringRunner.class)
 public abstract class AbstractTest {
     @MockBean
@@ -38,7 +37,6 @@ public abstract class AbstractTest {
         Assert.assertNotNull(domainEvent.getRevocationEndDate());
         Assert.assertEquals(domainEvent.getRevocationEndDate(), REVOCATION_END_DATE);
         Assert.assertNotNull(domainEvent.getRevocationStartDate());
-        Assert.assertEquals(domainEvent.getRevocationStartDate(), LocalDate.now());
         Assert.assertNotNull(domainEvent.getRevocationId());
     }
 
@@ -60,6 +58,9 @@ public abstract class AbstractTest {
         Assert.assertEquals(domainEvent.getPersonId(), PERSON_ID);
         Assert.assertNotNull(domainEvent.getStartDate());
         Assert.assertNotNull(domainEvent.getEndDate());
+        Assert.assertNotNull(domainEvent.getAttachments());
+        Assert.assertNotNull(domainEvent.getIssuanceReason());
+        Assert.assertEquals(domainEvent.getIssuanceReason(), ISSUANCE_REASON);
     }
 
     protected void assertDrivingLicenseRevocationProlongedDomainEvent(DrivingLicenseRevocationProlonged domainEvent) {
@@ -75,7 +76,7 @@ public abstract class AbstractTest {
 
     protected void assertProlongedRevokeDrivingLicense(DrivingLicense drivingLicense) {
         Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
-        LocalDate revocationEndDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
+        LocalDateTime revocationEndDate = (LocalDateTime) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
 
         Assert.assertNotNull(revocation);
         Assert.assertNotNull(revocationEndDate);
@@ -86,8 +87,8 @@ public abstract class AbstractTest {
         Revocation revocation = (Revocation) ReflectionTestUtils.getField(drivingLicense, "revocation");
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         RevocationId revocationId = (RevocationId) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "revocationId");
-        LocalDate revocationStartDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "startDate");
-        LocalDate revocationEndDate = (LocalDate) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
+        LocalDateTime revocationStartDate = (LocalDateTime) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "startDate");
+        LocalDateTime revocationEndDate = (LocalDateTime) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "endDate");
         Boolean expired = (Boolean) ReflectionTestUtils.getField(Objects.requireNonNull(revocation), "expired");
 
         Assert.assertNotNull(status);
@@ -95,7 +96,6 @@ public abstract class AbstractTest {
         Assert.assertNotNull(revocation);
         Assert.assertNotNull(revocationId);
         Assert.assertNotNull(revocationStartDate);
-        Assert.assertEquals(revocationStartDate, LocalDate.now());
         Assert.assertEquals(revocationEndDate, REVOCATION_END_DATE);
         Assert.assertFalse(expired);
     }

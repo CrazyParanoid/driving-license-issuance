@@ -8,19 +8,17 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import ru.mvd.driving.license.AbstractTest;
-import ru.mvd.driving.license.Application;
+import ru.mvd.driving.license.config.MongoCustomizationConfiguration;
 import ru.mvd.driving.license.domain.TestDomainObjectsFactory;
-import ru.mvd.driving.license.domain.model.DomainEventPublisher;
 import ru.mvd.driving.license.domain.model.DrivingLicense;
 import ru.mvd.driving.license.domain.model.DrivingLicenseDisabled;
 import ru.mvd.driving.license.domain.model.DrivingLicenseId;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {Application.class})
+@Import(MongoCustomizationConfiguration.class)
 public class DisableDrivingLicenseCommandProcessorTest extends AbstractTest {
     @Autowired
     private TestDomainObjectsFactory testDomainObjectsFactory;
@@ -28,12 +26,8 @@ public class DisableDrivingLicenseCommandProcessorTest extends AbstractTest {
     private TestCommandFactory testCommandFactory;
     @Autowired
     private CommandProcessor<DisableDrivingLicenseCommand, String> disableDrivingLicenseCommandProcessor;
-    @MockBean
-    private DomainEventPublisher<DrivingLicenseDisabled> drivingLicenseDisabledDomainEventPublisher;
     @Captor
     private ArgumentCaptor<DrivingLicense> drivingLicenseArgumentCaptor;
-    @Captor
-    private ArgumentCaptor<DrivingLicenseDisabled> drivingLicenseDisabledArgumentCaptor;
 
     @Before
     public void setup() {
@@ -49,9 +43,9 @@ public class DisableDrivingLicenseCommandProcessorTest extends AbstractTest {
         String id = disableDrivingLicenseCommandProcessor.process(command);
 
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
-        Mockito.verify(drivingLicenseDisabledDomainEventPublisher).publish(drivingLicenseDisabledArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicenseDisabledArgumentCaptor.getValue();
+        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseDisabled.class);
         Assert.assertNotNull(id);
         assertDisabledDrivingLicense(drivingLicense);
         assertDrivingLicenseDisabledDomainEvent(drivingLicenseDisabledDomainEvent);

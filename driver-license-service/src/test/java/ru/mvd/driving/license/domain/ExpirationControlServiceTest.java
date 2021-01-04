@@ -7,33 +7,24 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.AbstractTest;
-import ru.mvd.driving.license.Application;
-import ru.mvd.driving.license.domain.model.*;
+import ru.mvd.driving.license.domain.model.DrivingLicense;
+import ru.mvd.driving.license.domain.model.DrivingLicenseDisabled;
+import ru.mvd.driving.license.domain.model.DrivingLicenseRevocationExpired;
+import ru.mvd.driving.license.domain.model.ExpirationControlService;
 
 import java.util.concurrent.TimeUnit;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = {Application.class})
 public class ExpirationControlServiceTest extends AbstractTest {
     @Autowired
     private TestDomainObjectsFactory testDomainObjectsFactory;
     @Autowired
     private ExpirationControlService expirationControlService;
-    @MockBean
-    private DomainEventPublisher<DrivingLicenseRevocationExpired> drivingLicenseRevocationExpiredDomainEventPublisher;
-    @MockBean
-    private DomainEventPublisher<DrivingLicenseDisabled> drivingLicenseDisabledDomainEventPublisher;
     @Captor
     private ArgumentCaptor<DrivingLicense> drivingLicenseArgumentCaptor;
-    @Captor
-    private ArgumentCaptor<DrivingLicenseRevocationExpired> drivingLicenseRevocationExpiredArgumentCaptor;
-    @Captor
-    private ArgumentCaptor<DrivingLicenseDisabled> drivingLicenseDisabledArgumentCaptor;
 
     @Test
     public void testCheckExpiredRevocation() {
@@ -45,16 +36,12 @@ public class ExpirationControlServiceTest extends AbstractTest {
                 .atMost(6, TimeUnit.SECONDS)
                 .untilAsserted(() -> expirationControlService.checkRevocationExpiration());
 
-        Mockito.verify(drivingLicenseDisabledDomainEventPublisher)
-                .publish(drivingLicenseDisabledArgumentCaptor.capture());
-        Mockito.verify(drivingLicenseRevocationExpiredDomainEventPublisher)
-                .publish(drivingLicenseRevocationExpiredArgumentCaptor.capture());
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent =
-                drivingLicenseDisabledArgumentCaptor.getValue();
-        DrivingLicenseRevocationExpired drivingLicenseRevocationExpiredDomainEvent =
-                drivingLicenseRevocationExpiredArgumentCaptor.getValue();
+        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseDisabled.class);
+        DrivingLicenseRevocationExpired drivingLicenseRevocationExpiredDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseRevocationExpired.class);
 
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         Assert.assertEquals(status, DrivingLicense.Status.INVALID);
@@ -74,16 +61,12 @@ public class ExpirationControlServiceTest extends AbstractTest {
                 .atMost(6, TimeUnit.SECONDS)
                 .untilAsserted(() -> expirationControlService.checkRevocationExpiration());
 
-        Mockito.verify(drivingLicenseDisabledDomainEventPublisher)
-                .publish(drivingLicenseDisabledArgumentCaptor.capture());
-        Mockito.verify(drivingLicenseRevocationExpiredDomainEventPublisher)
-                .publish(drivingLicenseRevocationExpiredArgumentCaptor.capture());
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent =
-                drivingLicenseDisabledArgumentCaptor.getValue();
-        DrivingLicenseRevocationExpired drivingLicenseRevocationExpiredDomainEvent =
-                drivingLicenseRevocationExpiredArgumentCaptor.getValue();
+        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseDisabled.class);
+        DrivingLicenseRevocationExpired drivingLicenseRevocationExpiredDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseRevocationExpired.class);
 
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         Assert.assertEquals(status, DrivingLicense.Status.REVOKED);
@@ -101,12 +84,10 @@ public class ExpirationControlServiceTest extends AbstractTest {
                 .atMost(6, TimeUnit.SECONDS)
                 .untilAsserted(() -> expirationControlService.checkDrivingLicenseExpiration());
 
-        Mockito.verify(drivingLicenseDisabledDomainEventPublisher)
-                .publish(drivingLicenseDisabledArgumentCaptor.capture());
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent =
-                drivingLicenseDisabledArgumentCaptor.getValue();
+        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseDisabled.class);
 
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         Assert.assertEquals(status, DrivingLicense.Status.INVALID);
@@ -124,12 +105,10 @@ public class ExpirationControlServiceTest extends AbstractTest {
                 .atMost(6, TimeUnit.SECONDS)
                 .untilAsserted(() -> expirationControlService.checkDrivingLicenseExpiration());
 
-        Mockito.verify(drivingLicenseDisabledDomainEventPublisher)
-                .publish(drivingLicenseDisabledArgumentCaptor.capture());
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent =
-                drivingLicenseDisabledArgumentCaptor.getValue();
+        DrivingLicenseDisabled drivingLicenseDisabledDomainEvent = drivingLicense
+                .getDomainEventByType(DrivingLicenseDisabled.class);
 
         DrivingLicense.Status status = (DrivingLicense.Status) ReflectionTestUtils.getField(drivingLicense, "status");
         Assert.assertEquals(status, DrivingLicense.Status.VALID);

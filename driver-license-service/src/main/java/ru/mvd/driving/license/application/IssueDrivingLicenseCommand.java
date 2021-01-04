@@ -1,8 +1,10 @@
 package ru.mvd.driving.license.application;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Future;
@@ -14,11 +16,13 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class IssueDrivingLicenseCommand implements Command{
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class IssueDrivingLicenseCommand implements Command {
     @NotEmpty(message = "drivingLicenseId can't be null or empty")
     private String departmentId;
     @NotEmpty(message = "personId can't be null or empty")
     private String personId;
+    @Length(min = 2, max = 3, message = "the length of areaCode must be between 2 and 3")
     @NotEmpty(message = "areaCode can't be null or empty")
     private String areaCode;
     @NotEmpty(message = "attachments can't be empty")
@@ -32,7 +36,8 @@ public class IssueDrivingLicenseCommand implements Command{
 
     @Data
     @AllArgsConstructor
-    public static class AttachmentDTO{
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AttachmentDTO {
         @NotEmpty(message = "attachmentType can't be null or empty")
         private String attachmentType;
         @NotEmpty(message = "fileId can't be null or empty")
@@ -41,7 +46,8 @@ public class IssueDrivingLicenseCommand implements Command{
 
     @Data
     @AllArgsConstructor
-    public static class CategoryDTO{
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class CategoryDTO {
         @NotNull(message = "startDate can't be null")
         private LocalDate startDate;
         @NotNull(message = "endDate can't be null")

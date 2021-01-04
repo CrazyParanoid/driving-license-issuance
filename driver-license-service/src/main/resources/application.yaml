@@ -1,7 +1,46 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: driving-license-service
+  data:
+    mongodb:
+      database: ${DB_NAME}
+      uri: ${DB_URI}
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers:
+            - ${KAFKA_HOST_PORT}
+      bindings:
+        drivingLicenseIssuedChannel:
+          destination: drivingLicenseIssuedTopic
+          content-type: application/json
+        drivingLicenseDisabledChannel:
+          destination: drivingLicenseDisabledTopic
+          content-type: application/json
+        drivingLicenseRevokedChannel:
+          destination: drivingLicenseRevokedTopic
+          content-type: application/json
+        drivingLicenseRevocationProlongedChannel:
+          destination: drivingLicenseRevocationProlongedTopic
+          content-type: application/json
+        drivingLicenseRevocationExpiredChannel:
+          destination: drivingLicenseRevocationExpiredTopic
+          content-type: application/json
+scheduler:
+  pool: 7
+  delay:
+    event: 5000
+    revocation: 5000
+    driving-license: 5000
 
-delay:
-  revocation: 5000
-  driving-license: 5000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
