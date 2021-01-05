@@ -27,13 +27,13 @@ public class Application {
 
     @Configuration
     public static class SchedulingConfiguration implements SchedulingConfigurer {
-
         @Value("${scheduler.pool}")
         private int poolSize;
+
         @Override
         public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
             ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-            taskScheduler.setPoolSize(100);
+            taskScheduler.setPoolSize(poolSize);
             taskScheduler.initialize();
             scheduledTaskRegistrar.setTaskScheduler(taskScheduler);
         }
