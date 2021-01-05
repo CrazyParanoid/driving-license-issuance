@@ -34,6 +34,18 @@ public class DrivingLicenseTest extends AbstractTest {
     }
 
     @Test
+    public void testAlreadyIssueDrivingLicense() {
+        DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
+        Mockito.when(drivingLicenseRepository.findNotInvalidByPersonId(ArgumentMatchers.any(PersonId.class)))
+                .thenReturn(drivingLicense);
+
+        UnsupportedOperationException exception = Assert.assertThrows(UnsupportedOperationException.class,
+                () -> testDomainObjectsFactory.newDrivingLicense());
+
+        Assert.assertTrue(exception.getMessage().contains("The person with id 258890 already has driving license"));
+    }
+
+    @Test
     public void testIssueDrivingLicenseWhenPersonNameDetailsChanged() {
         DrivingLicense firstDrivingLicense = testDomainObjectsFactory.newDrivingLicense();
         Mockito.when(drivingLicenseRepository.findByDrivingLicenseId(
