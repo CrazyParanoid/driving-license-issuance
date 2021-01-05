@@ -8,7 +8,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import ru.mvd.driving.license.domain.supertype.AggregateRoot;
-import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,9 +39,7 @@ public class DrivingLicense extends AggregateRoot {
                    LocalDateTime endDate, Set<Category> categories,
                    Set<SpecialMark> specialMarks,
                    List<Attachment> attachments, Status status,
-                   IssuanceReason issuanceReason,
-                   List<DomainEvent> domainEvents) {
-        super(domainEvents);
+                   IssuanceReason issuanceReason) {
         this.drivingLicenseId = drivingLicenseId;
         this.departmentId = departmentId;
         this.personId = personId;

@@ -4,7 +4,7 @@ public interface DrivingLicenseRepository {
 
     DrivingLicense findByDrivingLicenseId(DrivingLicenseId drivingLicenseId);
 
-    DrivingLicense findByPersonId(PersonId personId);
+    DrivingLicense findNotInvalidByPersonId(PersonId personId);
 
     DrivingLicense findNextRevokedDrivingLicense();
 

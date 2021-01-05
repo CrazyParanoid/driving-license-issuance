@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.input;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +8,7 @@ import ru.mvd.driving.license.application.*;
 
 import javax.validation.Valid;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/driving-licenses")
 public class DrivingLicenseController {
@@ -29,6 +31,7 @@ public class DrivingLicenseController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DrivingLicenseResponse postIssueDrivingLicenseCommand(@RequestBody @Valid IssueDrivingLicenseCommand command) {
+        log.info("IssueDrivingLicenseCommand has been received");
         String id = issueDrivingLicenseCommandProcessor.process(command);
         return createResponse(id);
     }
@@ -36,6 +39,7 @@ public class DrivingLicenseController {
     @PostMapping("/disable")
     @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postDisableDrivingLicenseCommand(@RequestBody @Valid DisableDrivingLicenseCommand command) {
+        log.info("DisableDrivingLicenseCommand has been received");
         String id = disableDrivingLicenseCommandProcessor.process(command);
         return createResponse(id);
     }
@@ -43,6 +47,7 @@ public class DrivingLicenseController {
     @PostMapping("/revocation")
     @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postRevokeDrivingLicenseCommand(@RequestBody @Valid RevokeDrivingLicenseCommand command) {
+        log.info("RevokeDrivingLicenseCommand has been received");
         String id = revokeDrivingLicenseCommandProcessor.process(command);
         return createResponse(id);
     }
@@ -50,6 +55,7 @@ public class DrivingLicenseController {
     @PostMapping("/revocation/prolong")
     @ResponseStatus(HttpStatus.OK)
     public DrivingLicenseResponse postProlongRevocationCommand(@RequestBody @Valid ProlongRevocationCommand command) {
+        log.info("ProlongRevocationCommand has been received");
         String id = prolongRevocationCommandProcessor.process(command);
         return createResponse(id);
     }

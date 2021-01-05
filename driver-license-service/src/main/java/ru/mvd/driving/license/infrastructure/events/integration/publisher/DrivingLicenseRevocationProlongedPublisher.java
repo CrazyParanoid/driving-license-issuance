@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.infrastructure.events.integration.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +11,7 @@ import ru.mvd.driving.license.infrastructure.events.StoredDomainEventRepository;
 import ru.mvd.driving.license.infrastructure.events.integration.DrivingLicenseRevocationProlongedIntegrationEvent;
 import ru.mvd.driving.license.infrastructure.events.integration.OutputChannelBindings;
 
+@Slf4j
 @Component
 public class DrivingLicenseRevocationProlongedPublisher
         extends AbstractIntegrationEventPublisher<DrivingLicenseRevocationProlonged, DrivingLicenseRevocationProlongedIntegrationEvent> {
@@ -25,6 +27,7 @@ public class DrivingLicenseRevocationProlongedPublisher
                 .send(MessageBuilder
                         .withPayload(integrationEvent)
                         .build());
+        log.info("DrivingLicenseRevocationProlongedIntegrationEvent has been published");
     }
 
     @Override

@@ -28,7 +28,7 @@ public class DrivingLicenseIssued implements DomainEvent {
     private List<Attachment> attachments;
 
     public String getDrivingLicenseId() {
-        return this.drivingLicenseId.toFullNumber();
+        return this.drivingLicenseId.getFullNumber();
     }
 
     public String getDepartmentId() {

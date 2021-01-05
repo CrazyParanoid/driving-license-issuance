@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.infrastructure.events.integration.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class DrivingLicenseIssuedPublisher
         extends AbstractIntegrationEventPublisher<DrivingLicenseIssued, DrivingLicenseIssuedIntegrationEvent> {
@@ -32,6 +34,7 @@ public class DrivingLicenseIssuedPublisher
                 .send(MessageBuilder
                         .withPayload(integrationEvent)
                         .build());
+        log.info("DrivingLicenseIssuedIntegrationEvent has been published");
     }
 
     @Override

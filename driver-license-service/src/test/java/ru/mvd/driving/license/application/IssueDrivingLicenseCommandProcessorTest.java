@@ -51,7 +51,7 @@ public class IssueDrivingLicenseCommandProcessorTest extends AbstractTest {
         issueDrivingLicenseCommandProcessor.process(command);
         Mockito.verify(drivingLicenseRepository).save(drivingLicenseArgumentCaptor.capture());
         DrivingLicense drivingLicense = drivingLicenseArgumentCaptor.getValue();
-        Mockito.when(drivingLicenseRepository.findByPersonId(ArgumentMatchers.any(PersonId.class)))
+        Mockito.when(drivingLicenseRepository.findNotInvalidByPersonId(ArgumentMatchers.any(PersonId.class)))
                 .thenReturn(drivingLicense);
 
         UnsupportedOperationException exception = Assert.assertThrows(UnsupportedOperationException.class,
@@ -79,7 +79,6 @@ public class IssueDrivingLicenseCommandProcessorTest extends AbstractTest {
         Assert.assertNotNull(personId);
         Assert.assertNotNull(startDate);
         Assert.assertNotNull(endDate);
-        Assert.assertEquals(endDate, startDate.plusYears(DrivingLicense.DRIVING_LICENSE_VALID_YEAR_PERIOD));
         Assert.assertNotNull(anAttachments);
         Assert.assertNull(revocation);
         Assert.assertNotNull(issuanceReason);

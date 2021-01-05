@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.domain.model;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import ru.mvd.driving.license.domain.supertype.DomainService;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class ExpirationControlService implements DomainService {
     private final DrivingLicenseRepository drivingLicenseRepository;

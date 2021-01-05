@@ -3,8 +3,9 @@ package ru.mvd.driving.license;
 import java.time.LocalDateTime;
 
 public abstract class TestValues {
-    public static final String SERIES = "9902";
-    public static final String NUMBER = "789067";
+    public static final String SERIES = "7700";
+    public static final String NUMBER = "000001";
+    public static final String FULL_NUMBER = "7700000001";
     public static final String DEPARTMENT_ID = "113667";
     public static final String PERSON_ID = "258890";
     public static final String ISSUANCE_REASON = "FIRST_ISSUANCE";

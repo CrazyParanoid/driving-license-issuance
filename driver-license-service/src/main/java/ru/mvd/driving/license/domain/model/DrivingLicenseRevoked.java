@@ -16,7 +16,7 @@ public class DrivingLicenseRevoked implements DomainEvent {
     private LocalDateTime revocationEndDate;
 
     public String getDrivingLicenseId(){
-        return this.drivingLicenseId.toFullNumber();
+        return this.drivingLicenseId.getFullNumber();
     }
 
     public String getRevocationId(){

@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.application;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import ru.mvd.driving.license.domain.supertype.DomainEvent;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class DisableDrivingLicenseCommandProcessor implements CommandProcessor<DisableDrivingLicenseCommand, String> {
     private final DrivingLicenseRepository drivingLicenseRepository;
@@ -33,6 +35,8 @@ public class DisableDrivingLicenseCommandProcessor implements CommandProcessor<D
         List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
         domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
-        return Objects.requireNonNull(drivingLicenseId).toFullNumber();
+        String fullNumber = Objects.requireNonNull(drivingLicenseId).getFullNumber();
+        log.info("DrivingLicense with id {} has been disabled", fullNumber);
+        return fullNumber;
     }
 }

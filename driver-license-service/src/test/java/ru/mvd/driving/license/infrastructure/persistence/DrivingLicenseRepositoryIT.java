@@ -19,8 +19,7 @@ import ru.mvd.driving.license.config.MongoTransactionConfiguration;
 import ru.mvd.driving.license.domain.TestDomainObjectsFactory;
 import ru.mvd.driving.license.domain.model.*;
 
-import static ru.mvd.driving.license.TestValues.JUDGMENT_FILE_ID;
-import static ru.mvd.driving.license.TestValues.REVOCATION_END_DATE;
+import static ru.mvd.driving.license.TestValues.*;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
@@ -35,7 +34,7 @@ public class DrivingLicenseRepositoryIT {
     private DrivingLicenseRepository drivingLicenseRepository;
 
     private static final PersonId PERSON_ID = new PersonId("258890");
-    private static final DrivingLicenseId DRIVING_LICENSE_ID = DrivingLicenseId.identifyFrom("7700000001");
+    private static final DrivingLicenseId DRIVING_LICENSE_ID = DrivingLicenseId.identifyFrom(FULL_NUMBER);
     private static final DrivingLicenseId SECOND_DRIVING_LICENSE_ID = DrivingLicenseId.identifyFrom("7700000002");
     private static final AreaCode areaCode = new AreaCode("77");
 
@@ -92,7 +91,7 @@ public class DrivingLicenseRepositoryIT {
             }
         });
 
-        DrivingLicense foundDrivingLicense = drivingLicenseRepository.findByPersonId(PERSON_ID);
+        DrivingLicense foundDrivingLicense = drivingLicenseRepository.findNotInvalidByPersonId(PERSON_ID);
 
         PersonId personId = (PersonId) ReflectionTestUtils.getField(drivingLicense, "personId");
         Assert.assertNotNull(foundDrivingLicense);
@@ -106,15 +105,6 @@ public class DrivingLicenseRepositoryIT {
 
         String exceptionMessage = exception.getMessage();
         Assert.assertTrue(exceptionMessage.contains("DrivingLicense with id 7700000001 is not found"));
-    }
-
-    @Test
-    public void testNotFoundDrivingLicenseByPersonId() {
-        DrivingLicenseNotFoundException exception = Assert.assertThrows(DrivingLicenseNotFoundException.class, () ->
-                drivingLicenseRepository.findByPersonId(PERSON_ID));
-
-        String exceptionMessage = exception.getMessage();
-        Assert.assertTrue(exceptionMessage.contains("DrivingLicense for person with id 258890 is not found"));
     }
 
     @Test

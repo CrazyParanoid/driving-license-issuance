@@ -73,7 +73,7 @@ public class DrivingLicenseControllerTest extends AbstractTest {
     public void testDeduplication() {
         IssueDrivingLicenseCommand command = testCommandFactory.createIssueDrivingLicenseCommand();
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
-        Mockito.when(drivingLicenseRepository.findByPersonId(ArgumentMatchers.any(PersonId.class)))
+        Mockito.when(drivingLicenseRepository.findNotInvalidByPersonId(ArgumentMatchers.any(PersonId.class)))
                 .thenReturn(drivingLicense);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/driving-licenses")

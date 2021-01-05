@@ -70,7 +70,7 @@ public class DrivingLicenseTest extends AbstractTest {
     public void testIssueDrivingLicenseWhenPersonNameDetailsChangedAndNullPreviousDrivingLicenseId() {
         Mockito.when(drivingLicenseRepository.nextIdentity(
                 ArgumentMatchers.any(AreaCode.class)))
-                .thenReturn(new DrivingLicenseId(SERIES, NUMBER));
+                .thenReturn(DrivingLicenseId.identifyFrom(FULL_NUMBER));
 
         IllegalArgumentException exception = Assert.assertThrows(IllegalArgumentException.class, () -> {
             DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicenseForPersonNameDetailsChanging();

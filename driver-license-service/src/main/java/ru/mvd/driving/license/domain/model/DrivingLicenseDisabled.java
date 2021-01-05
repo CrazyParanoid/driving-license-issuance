@@ -8,7 +8,7 @@ public class DrivingLicenseDisabled implements DomainEvent {
     private DrivingLicenseId drivingLicenseId;
 
     public String getDrivingLicenseId(){
-        return this.drivingLicenseId.toFullNumber();
+        return this.drivingLicenseId.getFullNumber();
     }
 
 }

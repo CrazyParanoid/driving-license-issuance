@@ -1,5 +1,6 @@
 package ru.mvd.driving.license.application;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
 import java.util.*;
 
+@Slf4j
 @Service
 public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<IssueDrivingLicenseCommand, String> {
     private final DrivingLicenseRepository drivingLicenseRepository;
@@ -27,7 +29,6 @@ public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<Iss
     @Override
     @Transactional
     public String process(IssueDrivingLicenseCommand command) {
-        deduplicate(command.getPersonId());
         Set<Category> categories = categoriesFrom(command.getCategories());
         List<Attachment> attachments = attachmentsFrom(command.getAttachments());
         DrivingLicense drivingLicense = drivingLicenseFactory.issueDrivingLicense(
@@ -43,15 +44,9 @@ public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<Iss
         domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
         DrivingLicenseId drivingLicenseId = drivingLicense.getDrivingLicenseId();
-        return drivingLicenseId.toFullNumber();
-    }
-
-    private void deduplicate(String aPersonId) {
-        PersonId personId = new PersonId(aPersonId);
-        DrivingLicense drivingLicense = drivingLicenseRepository.findByPersonId(personId);
-        if (!Objects.isNull(drivingLicense))
-            throw new UnsupportedOperationException(
-                    String.format("The person with id %s already has driving license", aPersonId));
+        String fullNumber = Objects.requireNonNull(drivingLicenseId).getFullNumber();
+        log.info("DrivingLicense with id {} has been issued", fullNumber);
+        return fullNumber;
     }
 
     private Set<Category> categoriesFrom(Set<IssueDrivingLicenseCommand.CategoryDTO> rawCategories) {

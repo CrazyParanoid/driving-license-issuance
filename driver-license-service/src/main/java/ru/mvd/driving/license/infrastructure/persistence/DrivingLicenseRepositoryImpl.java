@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.mvd.driving.license.domain.model.*;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j
@@ -23,7 +24,7 @@ public class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
         try {
             return drivingLicenseMongoRepository.findByDrivingLicenseId(drivingLicenseId)
                     .orElseThrow(() -> new DrivingLicenseNotFoundException(
-                            String.format("DrivingLicense with id %s is not found", drivingLicenseId.toFullNumber()))
+                            String.format("DrivingLicense with id %s is not found", drivingLicenseId.getFullNumber()))
                     );
         } catch (MongoException ex) {
             String exceptionMessage = ex.getMessage();
@@ -33,12 +34,12 @@ public class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
     }
 
     @Override
-    public DrivingLicense findByPersonId(PersonId personId) {
+    public DrivingLicense findNotInvalidByPersonId(PersonId personId) {
         try {
-            return drivingLicenseMongoRepository.findByPersonId(personId)
-                    .orElseThrow(() -> new DrivingLicenseNotFoundException(
-                            String.format("DrivingLicense for person with id %s is not found", personId.getId()))
-                    );
+            return drivingLicenseMongoRepository.findByStatusInAndPersonId(
+                    Arrays.asList(DrivingLicense.Status.VALID, DrivingLicense.Status.REVOKED), personId
+            )
+                    .orElse(null);
         } catch (MongoException ex) {
             String exceptionMessage = ex.getMessage();
             log.error(exceptionMessage, ex);
@@ -85,8 +86,8 @@ public class DrivingLicenseRepositoryImpl implements DrivingLicenseRepository {
     public DrivingLicenseId nextIdentity(AreaCode areaCode) {
         try {
             Optional<DrivingLicense> optionalDrivingLicense = drivingLicenseMongoRepository
-                    .findByDrivingLicenseIdSeries(areaCode.formatCode());
-            if(optionalDrivingLicense.isPresent()){
+                    .findFirstByDrivingLicenseIdSeriesOrderByDrivingLicenseIdNumberDesc(areaCode.formatCode());
+            if (optionalDrivingLicense.isPresent()) {
                 DrivingLicense drivingLicense = optionalDrivingLicense.get();
                 DrivingLicenseId drivingLicenseId = drivingLicense.getDrivingLicenseId();
                 return drivingLicenseId.nextId();

@@ -29,7 +29,7 @@ public abstract class AbstractTest {
     public void init() {
         Mockito.when(drivingLicenseRepository.nextIdentity(
                 ArgumentMatchers.any(AreaCode.class)))
-                .thenReturn(new DrivingLicenseId(SERIES, NUMBER));
+                .thenReturn(DrivingLicenseId.identifyFrom(FULL_NUMBER));
     }
 
     protected void assertDrivingLicenseRevokedDomainEvent(DrivingLicenseRevoked domainEvent) {
