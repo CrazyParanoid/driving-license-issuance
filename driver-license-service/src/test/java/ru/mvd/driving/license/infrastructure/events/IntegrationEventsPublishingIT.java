@@ -26,17 +26,18 @@ import ru.mvd.driving.license.infrastructure.events.integration.publisher.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static ru.mvd.driving.license.TestValues.*;
 
-@ActiveProfiles("test")
+@ActiveProfiles("it")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Import(MongoCustomizationConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(brokerProperties = "log.dir=target/${random.uuid}/embedded-kafka")
-public class IntegrationEventsPublishingTest {
+public class IntegrationEventsPublishingIT {
     @Autowired
     private DomainEventPublisher domainEventPublisher;
     @Autowired
@@ -51,7 +52,6 @@ public class IntegrationEventsPublishingTest {
     private DrivingLicenseDisabledPublisher drivingLicenseDisabledPublisher;
     @Autowired
     private DrivingLicenseRevocationProlongedPublisher drivingLicenseRevocationProlongedPublisher;
-
     @MockBean
     private IntegrationEventHandler integrationEventHandler;
 
@@ -65,9 +65,8 @@ public class IntegrationEventsPublishingTest {
 
         domainEventPublisher.publish(domainEvents);
 
-        Awaitility.await()
-                .atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> drivingLicenseIssuedPublisher.findAndPublishDomainEvent());
+        Awaitility.await().atMost(6, TimeUnit.SECONDS)
+                .untilAsserted(drivingLicenseIssuedPublisher::findAndPublishDomainEvent);
         Mockito.verify(integrationEventHandler).handle(argumentCaptor.capture());
         DrivingLicenseIssuedIntegrationEvent integrationEvent = argumentCaptor.getValue();
         assertDrivingLicenseIssuedIntegrationEvent(integrationEvent, domainEvent);
@@ -86,7 +85,7 @@ public class IntegrationEventsPublishingTest {
 
         Awaitility.await()
                 .atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> drivingLicenseRevokedPublisher.findAndPublishDomainEvent());
+                .untilAsserted(drivingLicenseRevokedPublisher::findAndPublishDomainEvent);
         Mockito.verify(integrationEventHandler).handle(argumentCaptor.capture());
         DrivingLicenseRevokedIntegrationEvent integrationEvent = argumentCaptor.getValue();
         assertDrivingLicenseRevokedIntegrationEvent(integrationEvent, domainEvent);
@@ -98,6 +97,7 @@ public class IntegrationEventsPublishingTest {
         drivingLicense.disable();
         List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
         DrivingLicenseDisabled domainEvent = drivingLicense.getDomainEventByType(DrivingLicenseDisabled.class);
+
         ArgumentCaptor<DrivingLicenseDisabledIntegrationEvent> argumentCaptor =
                 ArgumentCaptor.forClass(DrivingLicenseDisabledIntegrationEvent.class);
 
@@ -105,7 +105,7 @@ public class IntegrationEventsPublishingTest {
 
         Awaitility.await()
                 .atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> drivingLicenseDisabledPublisher.findAndPublishDomainEvent());
+                .untilAsserted(drivingLicenseDisabledPublisher::findAndPublishDomainEvent);
         Mockito.verify(integrationEventHandler).handle(argumentCaptor.capture());
         DrivingLicenseDisabledIntegrationEvent integrationEvent = argumentCaptor.getValue();
         assertDrivingLicenseDisabledIntegrationEvent(integrationEvent, domainEvent);
@@ -126,8 +126,7 @@ public class IntegrationEventsPublishingTest {
 
         Awaitility.await()
                 .atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> drivingLicenseRevocationProlongedPublisher
-                        .findAndPublishDomainEvent());
+                .untilAsserted(drivingLicenseRevocationProlongedPublisher::findAndPublishDomainEvent);
         Mockito.verify(integrationEventHandler).handle(argumentCaptor.capture());
         DrivingLicenseRevocationProlongedIntegrationEvent integrationEvent = argumentCaptor.getValue();
         assertDrivingLicenseRevocationProlongedIntegrationEvent(integrationEvent, domainEvent);
@@ -152,8 +151,7 @@ public class IntegrationEventsPublishingTest {
 
         Awaitility.await()
                 .atMost(6, TimeUnit.SECONDS)
-                .untilAsserted(() -> drivingLicenseRevocationExpiredPublisher
-                        .findAndPublishDomainEvent());
+                .untilAsserted(drivingLicenseRevocationExpiredPublisher::findAndPublishDomainEvent);
         Mockito.verify(integrationEventHandler).handle(argumentCaptor.capture());
         DrivingLicenseRevocationExpiredIntegrationEvent integrationEvent = argumentCaptor.getValue();
         assertDrivingLicenseRevocationExpiredIntegrationEvent(integrationEvent, domainEvent);
@@ -169,21 +167,31 @@ public class IntegrationEventsPublishingTest {
         Assert.assertEquals(integrationEvent.getSpecialMarks(), domainEvent.getSpecialMarks());
         Assert.assertEquals(integrationEvent.getPersonId(), domainEvent.getPersonId());
         Assert.assertEquals(integrationEvent.getIssuanceReason(), domainEvent.getIssuanceReason());
-        integrationEvent.getAttachments().forEach(integrationAttachment -> {
-            long count = domainEvent.getAttachments().stream()
-                    .filter(attachment -> attachment.getFileId().equals(integrationAttachment.getFileId())
-                            && attachment.attachmentTypeToString().equals(integrationAttachment.getType())
-                    )
-                    .count();
-            Assert.assertEquals(count, 1);
-        });
-        integrationEvent.getCategories().forEach(integrationCategory -> {
-            long count = domainEvent.getCategories().stream()
+        assertAttachments(integrationEvent.getAttachments(), domainEvent.getAttachments());
+        assertCategories(integrationEvent.getCategories(), domainEvent.getCategories());
+    }
+
+    private void assertCategories(Set<DrivingLicenseIssuedIntegrationEvent.Category> integrationCategories,
+                                  Set<Category> categories) {
+        integrationCategories.forEach(integrationCategory -> {
+            long count = categories.stream()
                     .filter(category ->
                             category.typeToString().equals(integrationCategory.getType())
                                     && category.specialMarksToStrings().equals(integrationCategory.getSpecialMarks())
                                     && category.getEndDate().equals(integrationCategory.getEndDate())
                                     && category.getStartDate().equals(integrationCategory.getStartDate())
+                    )
+                    .count();
+            Assert.assertEquals(count, 1);
+        });
+    }
+
+    private void assertAttachments(List<DrivingLicenseIssuedIntegrationEvent.Attachment> integrationAttachments,
+                                   List<Attachment> attachments) {
+        integrationAttachments.forEach(integrationAttachment -> {
+            long count = attachments.stream()
+                    .filter(attachment -> attachment.getFileId().equals(integrationAttachment.getFileId())
+                            && attachment.attachmentTypeToString().equals(integrationAttachment.getType())
                     )
                     .count();
             Assert.assertEquals(count, 1);
@@ -206,7 +214,7 @@ public class IntegrationEventsPublishingTest {
     }
 
     private void assertDrivingLicenseRevocationProlongedIntegrationEvent(DrivingLicenseRevocationProlongedIntegrationEvent integrationEvent,
-                                                                         DrivingLicenseRevocationProlonged domainEvent){
+                                                                         DrivingLicenseRevocationProlonged domainEvent) {
         Assert.assertNotNull(integrationEvent);
         Assert.assertEquals(integrationEvent.getDrivingLicenseId(), domainEvent.getDrivingLicenseId());
         Assert.assertEquals(integrationEvent.getRevocationId(), domainEvent.getRevocationId());
@@ -214,9 +222,10 @@ public class IntegrationEventsPublishingTest {
     }
 
     private void assertDrivingLicenseRevocationExpiredIntegrationEvent(DrivingLicenseRevocationExpiredIntegrationEvent integrationEvent,
-                                                                       DrivingLicenseRevocationExpired domainEvent){
+                                                                       DrivingLicenseRevocationExpired domainEvent) {
         Assert.assertNotNull(integrationEvent);
         Assert.assertEquals(integrationEvent.getDrivingLicenseId(), domainEvent.getDrivingLicenseId());
         Assert.assertEquals(integrationEvent.getRevocationId(), domainEvent.getRevocationId());
     }
+
 }

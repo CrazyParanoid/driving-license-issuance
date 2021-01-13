@@ -26,7 +26,7 @@ public class ExpirationControlService implements DomainService {
     @Scheduled(fixedDelayString = "${scheduler.delay.revocation}")
     public void checkRevocationExpiration() {
         DrivingLicense drivingLicense = drivingLicenseRepository.findNextRevokedDrivingLicense();
-        if (!Objects.isNull(drivingLicense)) {
+        if (Objects.nonNull(drivingLicense)) {
             drivingLicense.disableIfRevocationExpired();
             List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
             domainEventPublisher.publish(domainEvents);
@@ -37,7 +37,7 @@ public class ExpirationControlService implements DomainService {
     @Scheduled(fixedDelayString = "${scheduler.delay.driving-license}")
     public void checkDrivingLicenseExpiration() {
         DrivingLicense drivingLicense = drivingLicenseRepository.findNextValidDrivingLicense();
-        if (!Objects.isNull(drivingLicense)) {
+        if (Objects.nonNull(drivingLicense)) {
             drivingLicense.disableIfExpired();
             List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
             domainEventPublisher.publish(domainEvents);

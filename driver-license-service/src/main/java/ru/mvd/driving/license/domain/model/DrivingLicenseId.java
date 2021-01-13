@@ -47,12 +47,13 @@ public class DrivingLicenseId implements ValueObject {
         if (object == null || getClass() != object.getClass())
             return false;
         DrivingLicenseId drivingLicenseId = (DrivingLicenseId) object;
-        return Objects.equals(series, drivingLicenseId.series) &&
-                Objects.equals(number, drivingLicenseId.number);
+        return series.equals(drivingLicenseId.series) &&
+                number.equals(drivingLicenseId.number) &&
+                fullNumber.equals(drivingLicenseId.fullNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(series, number);
+        return Objects.hash(series, number, fullNumber);
     }
 }

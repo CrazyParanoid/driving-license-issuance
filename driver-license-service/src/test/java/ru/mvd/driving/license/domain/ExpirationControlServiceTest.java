@@ -8,6 +8,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.AbstractTest;
 import ru.mvd.driving.license.domain.model.DrivingLicense;
@@ -18,6 +19,7 @@ import ru.mvd.driving.license.domain.model.ExpirationControlService;
 import java.util.concurrent.TimeUnit;
 
 @ActiveProfiles("test")
+@TestPropertySource(properties = "scheduler.enabled=true")
 public class ExpirationControlServiceTest extends AbstractTest {
     @Autowired
     private TestDomainObjectsFactory testDomainObjectsFactory;

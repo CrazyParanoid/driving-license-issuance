@@ -41,17 +41,19 @@ public class DrivingLicenseFactory {
                 attachments,
                 DrivingLicense.Status.VALID,
                 issuanceReason);
+
         Function<List<Attachment>, Boolean> verificationAction = attachmentVerificationActionFactory
                 .makeVerificationActionForReason(issuanceReason);
         drivingLicense.verifyAttachmentCompleteness(verificationAction);
         drivingLicense.openSubCategories();
         drivingLicense.registerDrivingLicenseIssuedDomainEvent();
+
         return drivingLicense;
     }
 
     private void checkAlreadyIssuedDrivingLicense(PersonId personId) {
         DrivingLicense drivingLicense = drivingLicenseRepository.findNotInvalidByPersonId(personId);
-        if (!Objects.isNull(drivingLicense))
+        if (Objects.nonNull(drivingLicense))
             throw new UnsupportedOperationException(
                     String.format("The person with id %s already has driving license", personId.getId()));
     }

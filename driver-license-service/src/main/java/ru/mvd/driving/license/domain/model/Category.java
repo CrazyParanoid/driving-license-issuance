@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import ru.mvd.driving.license.domain.supertype.Entity;
+import ru.mvd.driving.license.domain.supertype.ValueObject;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import static ru.mvd.driving.license.domain.model.Category.CategoryType.Unknown;
 
 @Getter(AccessLevel.PACKAGE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Category implements Entity {
+public class Category implements ValueObject {
     @Getter
     private LocalDate startDate;
     @Getter

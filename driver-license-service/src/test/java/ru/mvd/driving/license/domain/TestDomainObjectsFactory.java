@@ -76,6 +76,22 @@ public class TestDomainObjectsFactory {
         );
     }
 
+    public DrivingLicense newDrivingLicenseForNewPerson() {
+        String personId = UUID.randomUUID().toString();
+        Set<Category> categories = createCategories();
+        List<Attachment> attachments = createAttachments();
+        return drivingLicenseFactory.issueDrivingLicense(
+                IssuanceReason.fromName(ISSUANCE_REASON),
+                new PersonId(personId),
+                categories,
+                attachments,
+                new DepartmentId(DEPARTMENT_ID),
+                new AreaCode(AREA_CODE),
+                null,
+                createSpecialMarks()
+        );
+    }
+
     public DrivingLicense newDrivingLicenseForPersonNameDetailsChanging() {
         Set<Category> categories = createCategories();
         List<Attachment> attachments = createAttachments();

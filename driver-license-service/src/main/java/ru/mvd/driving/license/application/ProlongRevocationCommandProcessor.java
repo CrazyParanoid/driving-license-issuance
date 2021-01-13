@@ -4,11 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.mvd.driving.license.domain.model.*;
+import ru.mvd.driving.license.domain.model.DomainEventPublisher;
+import ru.mvd.driving.license.domain.model.DrivingLicense;
+import ru.mvd.driving.license.domain.model.DrivingLicenseId;
+import ru.mvd.driving.license.domain.model.DrivingLicenseRepository;
 import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -32,7 +34,7 @@ public class ProlongRevocationCommandProcessor implements CommandProcessor<Prolo
         List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
         domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
-        String fullNumber = Objects.requireNonNull(drivingLicenseId).getFullNumber();
+        String fullNumber = drivingLicense.getFullNumber();
         log.info("Revocation has been prolonged for drivingLicense with id {}", fullNumber);
         return fullNumber;
     }

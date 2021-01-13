@@ -29,7 +29,7 @@ public class Revocation implements Entity {
         }
     }
 
-    void prolong(LocalDateTime endDate) {
+    void calculateTerm(LocalDateTime endDate) {
         this.endDate = endDate;
         this.expired = false;
     }

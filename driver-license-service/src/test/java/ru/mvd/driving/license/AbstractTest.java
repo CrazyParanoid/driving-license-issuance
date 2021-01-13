@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.domain.model.*;
@@ -17,8 +17,8 @@ import java.util.Objects;
 
 import static ru.mvd.driving.license.TestValues.*;
 
-@SpringBootTest(classes = Application.class)
 @RunWith(SpringRunner.class)
+@ContextConfiguration(classes = Application.class)
 public abstract class AbstractTest {
     @MockBean
     protected DrivingLicenseRepository drivingLicenseRepository;

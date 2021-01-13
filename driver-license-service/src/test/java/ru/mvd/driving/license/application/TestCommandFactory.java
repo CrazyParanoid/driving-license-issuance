@@ -14,7 +14,6 @@ public class TestCommandFactory {
     private static final String STATEMENT = "STATEMENT";
     private static final String MEDICAL_REPORT = "MEDICAL_REPORT";
     private static final String PAYMENT_RECEIPT = "PAYMENT_RECEIPT";
-    private static final String CONFIRMATION_CHANGE_VALIDITY = "CONFIRMATION_CHANGE_VALIDITY";
     private static final String DRIVING_SCHOOL_GRADUATION_CERTIFICATE = "DRIVING_SCHOOL_GRADUATION_CERTIFICATE";
     private static final String B_CATEGORY = "B";
     private static final String AS_SPECIAL_MARK = "AS";
@@ -26,7 +25,7 @@ public class TestCommandFactory {
                 AREA_CODE,
                 createAttachments(),
                 createCategories(),
-                Set.of(AS_SPECIAL_MARK),
+                 Set.of(AS_SPECIAL_MARK),
                 ISSUANCE_REASON,
                 null
         );

@@ -9,7 +9,6 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import ru.mvd.driving.license.AbstractTest;
 import ru.mvd.driving.license.config.MongoCustomizationConfiguration;
@@ -20,7 +19,6 @@ import ru.mvd.driving.license.domain.model.DrivingLicenseRevocationProlonged;
 
 @ActiveProfiles("test")
 @Import(MongoCustomizationConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ProlongRevocationCommandProcessorTest extends AbstractTest {
     @Autowired
     private CommandProcessor<ProlongRevocationCommand, String> prolongRevocationCommandProcessor;

@@ -102,7 +102,7 @@ public class DrivingLicense extends AggregateRoot {
     public void prolongRevocation(LocalDateTime endDate) {
         if (this.status != Status.REVOKED)
             throw new IllegalStateException("Wrong invocation for current state");
-        this.revocation.prolong(endDate);
+        this.revocation.calculateTerm(endDate);
         registerDomainEvent(new DrivingLicenseRevocationProlonged(this.drivingLicenseId,
                 this.revocation.getRevocationId(),
                 endDate));
@@ -158,6 +158,10 @@ public class DrivingLicense extends AggregateRoot {
         boolean allAttachmentsExist = action.apply(this.attachments);
         if (!allAttachmentsExist)
             throw new IllegalStateException("Illegal document completeness for issuance");
+    }
+
+    public String getFullNumber(){
+        return this.drivingLicenseId.getFullNumber();
     }
 
     @RequiredArgsConstructor

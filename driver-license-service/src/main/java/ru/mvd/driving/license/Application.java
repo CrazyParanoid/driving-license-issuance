@@ -3,6 +3,7 @@ package ru.mvd.driving.license;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ru.mvd.driving.license.infrastructure.events.integration.OutputChannelBindings;
 
-@EnableScheduling
 @SpringBootApplication
 @EnableMongoAuditing
 @EnableDiscoveryClient
@@ -26,6 +26,8 @@ import ru.mvd.driving.license.infrastructure.events.integration.OutputChannelBin
 public class Application {
 
     @Configuration
+    @EnableScheduling
+    @ConditionalOnProperty(value = "scheduler.enabled", havingValue = "true", matchIfMissing = true)
     public static class SchedulingConfiguration implements SchedulingConfigurer {
         @Value("${scheduler.pool}")
         private int poolSize;

@@ -30,6 +30,7 @@ spring:
           destination: drivingLicenseRevocationExpiredTopic
           content-type: application/json
 scheduler:
+  enadled: true
   pool: 7
   delay:
     event: 5000

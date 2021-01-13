@@ -11,7 +11,6 @@ import ru.mvd.driving.license.domain.model.DrivingLicenseRepository;
 import ru.mvd.driving.license.domain.supertype.DomainEvent;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -35,7 +34,7 @@ public class RevokeDrivingLicenseCommandProcessor implements CommandProcessor<Re
         List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
         domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
-        String fullNumber = Objects.requireNonNull(drivingLicenseId).getFullNumber();
+        String fullNumber = drivingLicense.getFullNumber();
         log.info("DrivingLicense with id {} has been revoked", fullNumber);
         return fullNumber;
     }

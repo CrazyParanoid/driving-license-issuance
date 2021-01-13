@@ -10,24 +10,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import ru.mvd.driving.license.Application;
 import ru.mvd.driving.license.config.MongoCustomizationConfiguration;
-import ru.mvd.driving.license.config.MongoTransactionConfiguration;
 import ru.mvd.driving.license.domain.TestDomainObjectsFactory;
 import ru.mvd.driving.license.domain.model.*;
 
 import static ru.mvd.driving.license.TestValues.*;
 
-@ActiveProfiles("test")
+@ActiveProfiles("it")
 @RunWith(SpringRunner.class)
-@Import({MongoCustomizationConfiguration.class, MongoTransactionConfiguration.class})
-@SpringBootTest(classes = {Application.class})
+@Import(MongoCustomizationConfiguration.class)
+@SpringBootTest(classes = Application.class)
 public class DrivingLicenseRepositoryIT {
-    @Autowired
-    private TransactionTemplate transactionTemplate;
     @Autowired
     private TestDomainObjectsFactory testDomainObjectsFactory;
     @Autowired
@@ -46,12 +40,7 @@ public class DrivingLicenseRepositoryIT {
     @Test
     public void testSaveAndFindByIdDrivingLicense() {
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense);
-            }
-        });
+        drivingLicenseRepository.save(drivingLicense);
 
         DrivingLicense foundDrivingLicense = drivingLicenseRepository.findByDrivingLicenseId(DRIVING_LICENSE_ID);
         Assert.assertNotNull(foundDrivingLicense);
@@ -68,12 +57,7 @@ public class DrivingLicenseRepositoryIT {
     @Test
     public void testSecondNextIdentity() {
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense);
-            }
-        });
+        drivingLicenseRepository.save(drivingLicense);
 
         DrivingLicenseId drivingLicenseId = drivingLicenseRepository.nextIdentity(areaCode);
 
@@ -84,12 +68,7 @@ public class DrivingLicenseRepositoryIT {
     @Test
     public void testFindDrivingLicenseByPersonId() {
         DrivingLicense drivingLicense = testDomainObjectsFactory.newDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense);
-            }
-        });
+        drivingLicenseRepository.save(drivingLicense);
 
         DrivingLicense foundDrivingLicense = drivingLicenseRepository.findNotInvalidByPersonId(PERSON_ID);
 
@@ -110,27 +89,12 @@ public class DrivingLicenseRepositoryIT {
     @Test
     public void testFindNextValidDrivingLicense() {
         DrivingLicense drivingLicense1 = testDomainObjectsFactory.newDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense1);
-            }
-        });
-        DrivingLicense drivingLicense2 = testDomainObjectsFactory.newDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense2);
-            }
-        });
-
+        drivingLicenseRepository.save(drivingLicense1);
+        DrivingLicense drivingLicense2 = testDomainObjectsFactory.newDrivingLicenseForNewPerson();
+        drivingLicenseRepository.save(drivingLicense2);
         DrivingLicense foundDrivingLicense1 = drivingLicenseRepository.findNextValidDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(foundDrivingLicense1);
-            }
-        });
+        drivingLicenseRepository.save(foundDrivingLicense1);
+
         DrivingLicense foundDrivingLicense2 = drivingLicenseRepository.findNextValidDrivingLicense();
 
         Assert.assertEquals(drivingLicense1, foundDrivingLicense1);
@@ -141,28 +105,13 @@ public class DrivingLicenseRepositoryIT {
     public void testFindNextRevokedDrivingLicense() {
         DrivingLicense drivingLicense1 = testDomainObjectsFactory.newDrivingLicense();
         drivingLicense1.revoke(REVOCATION_END_DATE, JUDGMENT_FILE_ID);
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense1);
-            }
-        });
-        DrivingLicense drivingLicense2 = testDomainObjectsFactory.newDrivingLicense();
+        drivingLicenseRepository.save(drivingLicense1);
+        DrivingLicense drivingLicense2 = testDomainObjectsFactory.newDrivingLicenseForNewPerson();
         drivingLicense2.revoke(REVOCATION_END_DATE, JUDGMENT_FILE_ID);
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(drivingLicense2);
-            }
-        });
-
+        drivingLicenseRepository.save(drivingLicense2);
         DrivingLicense foundDrivingLicense1 = drivingLicenseRepository.findNextRevokedDrivingLicense();
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                drivingLicenseRepository.save(foundDrivingLicense1);
-            }
-        });
+        drivingLicenseRepository.save(foundDrivingLicense1);
+
         DrivingLicense foundDrivingLicense2 = drivingLicenseRepository.findNextRevokedDrivingLicense();
 
         Assert.assertEquals(drivingLicense1, foundDrivingLicense1);

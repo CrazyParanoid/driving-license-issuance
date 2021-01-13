@@ -8,7 +8,6 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.mvd.driving.license.AbstractTest;
@@ -21,7 +20,6 @@ import java.util.Set;
 
 @ActiveProfiles("test")
 @Import(MongoCustomizationConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class IssueDrivingLicenseCommandProcessorTest extends AbstractTest {
     @Autowired
     private TestCommandFactory testCommandFactory;

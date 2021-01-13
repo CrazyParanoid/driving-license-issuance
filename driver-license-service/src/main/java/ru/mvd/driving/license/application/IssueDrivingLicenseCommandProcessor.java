@@ -40,11 +40,12 @@ public class IssueDrivingLicenseCommandProcessor implements CommandProcessor<Iss
                 new AreaCode(command.getAreaCode()),
                 DrivingLicenseId.identifyFrom(command.getPreviousDrivingLicenseId()),
                 DrivingLicense.SpecialMark.setFrom(command.getSpecialMarks()));
+
         List<DomainEvent> domainEvents = drivingLicense.getDomainEvents();
         domainEventPublisher.publish(domainEvents);
         drivingLicenseRepository.save(drivingLicense);
-        DrivingLicenseId drivingLicenseId = drivingLicense.getDrivingLicenseId();
-        String fullNumber = Objects.requireNonNull(drivingLicenseId).getFullNumber();
+
+        String fullNumber = drivingLicense.getFullNumber();
         log.info("DrivingLicense with id {} has been issued", fullNumber);
         return fullNumber;
     }
